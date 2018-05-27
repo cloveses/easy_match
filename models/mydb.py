@@ -46,6 +46,6 @@ class Group(db.Entity):
     name = Required(str)
     teams = Set(Team)
 
-set_sql_debug(True)
+# set_sql_debug(True)
 db.bind(provider='sqlite', filename='dbs', create_db=True)
 db.generate_mapping(create_tables=True)

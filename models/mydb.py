@@ -1,4 +1,4 @@
-from pony import *
+from pony.orm import *
 
 db = Database()
 
@@ -23,19 +23,21 @@ class Player(db.Entity):
 
 class Team(db.Entity):
     name = Required(str)
-    teamers = set(Player)
-    face = Optional('Face')
+    players = set('Player')
+    facea = Optional('Face', reverse="teama")
+    faceb = Optional('Face', reverse="teamb")
 
 class PlayDate(db.Entity):
     flag = Required(str)
 
 class Face(db.Entity):
     times = Required(int)
-    teama = Required(Team)
-    teamb = Required(Team)
-    scorea = Optional(nullable=True)
-    scoreb = Optional(nullable=True)
+    teama = Required('Team', reverse="facea")
+    teamb = Required('Team', reverse="faceb")
+    scorea = Optional(int,nullable=True)
+    scoreb = Optional(int,nullable=True)
     playground = Optional(PlayGround)
 
+set_sql_debug(True)
 db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
 db.generate_mapping(create_tables=True)

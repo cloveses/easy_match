@@ -1,5 +1,6 @@
+from models.gather import clear_data,load_data
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QAction, QApplication
+from PyQt5.QtWidgets import QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox
 
 class Ui_MainWindow(QMainWindow):
 
@@ -41,9 +42,22 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.action_init.triggered.connect(self.clear_data_firm)
+        self.action_import_data.triggered.connect(self.get_data_file)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.menu.setTitle(_translate("MainWindow", "&管理数据"))
         self.action_init.setText(_translate("MainWindow", "&清理数据"))
         self.action_import_data.setText(_translate("MainWindow", "&导入数据"))
+
+    def get_data_file(self):
+        fname = QFileDialog.getOpenFileName(self, '打开文件', '.\\')
+        if fname[0]:
+            load_data(fname[0])
+
+    def clear_data_firm(self):
+        reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            clear_data()

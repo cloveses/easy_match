@@ -6,28 +6,55 @@ def clear_data():
     for o in (PlayGround,Games,Player,Team,PlayDate,Face,Group)[::-1]:
         select(r for r in o).delete(bulk=True)
 
-# def exvl2int(data):
-    
+def team_num2int(data):
+    default = 1
+    if isinstance(data,str) and data != '' and data.isdigt():
+        default = int(data)
+    if isinstance(data,float):
+        default = int(data)
+    return default if default>0 else 1
+
+def age2int(data):
+    if isinstance(data,str) and data != '' and data.isdigt():
+        return int(data)
+    if isinstance(data,float):
+        return int(data)
+
+def tel2str(data):
+    if isinstance(data,str):
+        return data
+    if isinstance(data,float):
+        return str(int(data))
 
 @db_session
 def load_data(fname):
     print(fname)
-    names_objs = (('playground',PlayGround,('name','memo')),
-        ('games',Games,('name','team_num','memo')),
-        ('players',Player,('name','idcode','sex','age','work_place','tel')))
+    names_objs = (('playground',PlayGround,('name','memo'),(None,None)),
+        ('games',Games,('name','team_num','memo'),(None,team_num2int,None)),
+        ('players',Player,('name','idcode','sex','age','work_place','tel'),
+                            (None,None,None,age2int,None,tel2str)))
     if fname.endswith('.xls') or fname.endswith('.xlsx'):
         wb = xlrd.open_workbook(fname)
-        for sheetname,obj,keys in names_objs:
+        for sheetname,obj,keys,chg_funs in names_objs:
             datas = []
             ws = wb.sheet_by_name(sheetname)
             for i in range(1,ws.nrows):
                 datas.append(ws.row_values(i))
-            print(datas)
-            for data in datas:
+            # print(datas)
+            for index,data in enumerate(datas):
+                data = [chgfun(d) if chgfun else d for d,chgfun in zip(data,chg_funs)]
                 param = dict()
                 for d,k in zip(data,keys):
                     if d:
                         param[k] = d
-                obj(**param)
+                try:
+                    # print(param)
+                    obj(**param)
+                except:
+                    rollback()
+                    # print('error!')
+                    info = '请检查{}表，第{}行数据。'.format(sheetname,index+1)
+                    # print(info,param)
+                    return info
 
 

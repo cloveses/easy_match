@@ -17,7 +17,7 @@ class Games(db.Entity):
 class Player(db.Entity):
     name = Required(str)
     idcode = Required(str, unique=True)
-    sex = Required(int)
+    sex = Required(str)
     age = Optional(int,nullable=True)
     work_place = Optional(str,nullable=True)
     tel = Required(str)

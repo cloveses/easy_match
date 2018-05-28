@@ -55,7 +55,9 @@ class Ui_MainWindow(QMainWindow):
     def get_data_file(self):
         fname = QFileDialog.getOpenFileName(self, '打开文件', '.\\')
         if fname[0]:
-            load_data(fname[0])
+            info = load_data(fname[0])
+            if info:
+                QMessageBox.information(self,"数据错误,请修改后重新导入！",info)
 
     def clear_data_firm(self):
         reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)

@@ -1,3 +1,4 @@
+import os
 from pony.orm import *
 
 db = Database()
@@ -47,5 +48,7 @@ class Group(db.Entity):
     teams = Set(Team)
 
 # set_sql_debug(True)
-db.bind(provider='sqlite', filename='dbs', create_db=True)
+filename = os.path.join(os.path.abspath(os.curdir),'dbs')
+
+db.bind(provider='sqlite', filename=filename, create_db=True)
 db.generate_mapping(create_tables=True)

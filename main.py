@@ -1,4 +1,5 @@
 import sys
+import pony.orm.dbproviders.sqlite
 from models.mydb import *
 from ui.ui import Ui_MainWindow,QApplication
 

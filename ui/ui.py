@@ -58,8 +58,12 @@ class Ui_MainWindow(QMainWindow):
             info = load_data(fname[0])
             if info:
                 QMessageBox.information(self,"数据错误,请修改后重新导入！",info)
+            else:
+                QMessageBox.information(self,"提示：",'数据导入成功！')
 
     def clear_data_firm(self):
         reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             clear_data()
+
+# QApplication.processEvents()

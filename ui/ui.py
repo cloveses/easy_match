@@ -1,11 +1,12 @@
-from models.gather import clear_data,load_data,get_games
+from models.gather import clear_data,load_data,get_games,get_games_sex,get_players
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
+from PyQt5.QtWidgets import QCheckBox,QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
 
 class Ui_MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.select_checkbox_num = 0
         self.setupUi(self)
         self.retranslateUi(self)
 
@@ -58,7 +59,7 @@ class Ui_MainWindow(QMainWindow):
 
         scroll_area = QScrollArea()
         right_widgt = QWidget(None)
-        self.right_widgt_layout = QHBoxLayout()
+        self.right_widgt_layout = QVBoxLayout()
         right_widgt.setLayout(self.right_widgt_layout)
         self.right_widgt_layout.addWidget(QLabel('标签%i' % 5))
         self.right_widgt_layout.addWidget(QLabel('标签%i' % 7))
@@ -85,6 +86,22 @@ class Ui_MainWindow(QMainWindow):
     def set_cur_game(self,game):
         self.game = game
         print(game,self.game_data[game])
+        if self.game_data[game] == 1:
+            self.show_players(game)
+
+    def show_players(self,game):
+        game_sex = get_games_sex()
+        sex = game_sex[game]
+        self.players = get_players(sex)
+        self.p_checkboxes = [QCheckBox(' '.join((p.name,p.idcode))) for p in self.players]
+        for cb in self.p_checkboxes:
+            cb.toggle()
+            print('abc')
+            self.right_widgt_layout.addWidget(cb)
+            cb.show()
+        self.update()
+
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

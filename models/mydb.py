@@ -12,6 +12,7 @@ class PlayGround(db.Entity):
 class Games(db.Entity):
     name = Required(str)
     team_num = Required(int,sql_default=1,default=1)
+    sex = Optional(str,nullable=True)
     memo = Optional(str,nullable=True)
     team = Set('Team')
 

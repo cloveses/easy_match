@@ -30,7 +30,7 @@ def tel2str(data):
 def load_data(fname):
     print(fname)
     names_objs = (('playground',PlayGround,('name','memo'),(None,None)),
-        ('games',Games,('name','team_num','memo'),(None,team_num2int,None)),
+        ('games',Games,('name','team_num','sex','memo'),(None,team_num2int,None,None)),
         ('players',Player,('name','idcode','sex','age','work_place','tel'),
                             (None,None,None,age2int,None,tel2str)))
     if fname.endswith('.xls') or fname.endswith('.xlsx'):
@@ -63,3 +63,16 @@ def get_games():
     games = {k:v for k,v in games}
     return games
 
+@db_session
+def get_games_sex():
+    games = select((g.name,g.sex) for g in Games)
+    games = {k:v for k,v in games}
+    return games
+
+@db_session
+def get_players(sex=None):
+    if sex:
+        players = select(p for p in Player if p.sex==sex)[:]
+    else:
+        players = select(p for p in Player)[:]
+    return players

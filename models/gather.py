@@ -57,4 +57,9 @@ def load_data(fname):
                     # print(info,param)
                     return info
 
+@db_session
+def get_games():
+    games = select((g.name,g.team_num) for g in Games)
+    games = {k:v for k,v in games}
+    return games
 

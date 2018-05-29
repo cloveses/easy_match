@@ -1,6 +1,6 @@
-from models.gather import clear_data,load_data
+from models.gather import clear_data,load_data,get_games
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox
+from PyQt5.QtWidgets import QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
 
 class Ui_MainWindow(QMainWindow):
 
@@ -44,6 +44,47 @@ class Ui_MainWindow(QMainWindow):
 
         self.action_init.triggered.connect(self.clear_data_firm)
         self.action_import_data.triggered.connect(self.get_data_file)
+
+
+        main_form = QFormLayout()
+        left_widgt = QWidget(None)
+        left_widgt_layout = QVBoxLayout()
+        left_widgt.setLayout(left_widgt_layout)
+        for i in range(5):
+            left_widgt_layout.addWidget(QLabel('标签%i' % i))
+
+        for w in self.get_left_widgts():
+            left_widgt_layout.addWidget(w)
+
+        scroll_area = QScrollArea()
+        right_widgt = QWidget(None)
+        self.right_widgt_layout = QHBoxLayout()
+        right_widgt.setLayout(self.right_widgt_layout)
+        self.right_widgt_layout.addWidget(QLabel('标签%i' % 5))
+        self.right_widgt_layout.addWidget(QLabel('标签%i' % 7))
+        scroll_area.setWidget(right_widgt)
+        
+        main_form.addRow(left_widgt,scroll_area)
+
+        main_widgt = QWidget(None)
+        main_widgt.setLayout(main_form)
+        self.setCentralWidget(main_widgt)
+
+    def get_left_widgts(self):
+        widgts = []
+        self.game_data = get_games()
+        widgts.append(QLabel('运动项目:'))
+        self.game_combo = QComboBox(None)
+        for item in self.game_data.keys():
+            self.game_combo.addItem(item)
+        widgts.append(self.game_combo)
+
+        self.game_combo.activated[str].connect(self.set_cur_game)
+        return widgts
+
+    def set_cur_game(self,game):
+        self.game = game
+        print(game,self.game_data[game])
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

@@ -1,10 +1,10 @@
-from models.gather import clear_data,load_data,get_games,get_games_sex,get_players
+from models.gather import has_data,clear_data,load_data,get_games,get_games_sex,get_players
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QPushButton,QCheckBox,QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
 
 class MyQVBoxLayout(QVBoxLayout):
     def maximumSize(self):
-        return QtCore.QSize(-1,200)
+        return QtCore.QSize(100,-1)
 
 class Ui_MainWindow(QMainWindow):
 
@@ -50,29 +50,39 @@ class Ui_MainWindow(QMainWindow):
         self.action_init.triggered.connect(self.clear_data_firm)
         self.action_import_data.triggered.connect(self.get_data_file)
 
+        if has_data():
+            self.add_team_ui()
+
+    def add_team_ui(self):
         self.centralwidget = QWidget()
         self.form_layout = QHBoxLayout(self.centralwidget)
 
         self.left_layout = MyQVBoxLayout()
-        self.right_layout = QGridLayout()
+        self.right_layout = QVBoxLayout()
 
         qbtn = QPushButton('1')
         qbtn.resize(qbtn.minimumSize())
-        self.left_layout.addWidget(qbtn)
-        self.left_layout.addWidget(QLabel('def'))
-
-        self.right_layout.addWidget(QLabel('aaaa'),0,0)
-        self.right_layout.addWidget(QLabel('bbbb'),1,0)
-
+        widgts = self.get_left_widgts()
+        # self.left_layout.addWidget(qbtn)
+        # self.left_layout.addWidget(QLabel('def'))
+        for widgt in widgts:
+            self.left_layout.addWidget(widgt)
+        self.left_layout.addStretch()
+        # self.right_layout.addWidget(QLabel('aaaa'),0,0)
+        # self.right_layout.addWidget(QLabel('bbbb'),1,0)
+        widgts = self.get_right_widgets()
+        for widgt in widgts:
+            self.right_layout.addWidget(widgt)
+        self.right_layout.addStretch()
         self.form_layout.addLayout(self.left_layout)
         self.form_layout.addLayout(self.right_layout)
 
         self.setCentralWidget(self.centralwidget)
 
-        qbtn.clicked.connect(self.test)
+    #     qbtn.clicked.connect(self.test)
 
-    def test(self):
-        self.right_layout.addWidget(QLabel('NEWWW'),2,0)
+    # def test(self):
+    #     self.right_layout.addWidget(QLabel('NEWWW'),2,0)
 
 #         main_form = QFormLayout()
 #         left_widgt = QWidget(None)
@@ -98,23 +108,38 @@ class Ui_MainWindow(QMainWindow):
 #         main_widgt.setLayout(main_form)
 #         self.setCentralWidget(main_widgt)
 
-#     def get_left_widgts(self):
-#         widgts = []
-#         self.game_data = get_games()
-#         widgts.append(QLabel('运动项目:'))
-#         self.game_combo = QComboBox(None)
-#         for item in self.game_data.keys():
-#             self.game_combo.addItem(item)
-#         widgts.append(self.game_combo)
+    def get_left_widgts(self):
+        widgts = []
+        self.game_data = get_games()
+        mylbl = QLabel('运动项目:')
+        mylbl.setMaximumHeight(20)
+        widgts.append(mylbl)
+        self.game_combo = QComboBox(None)
+        self.game_combo.setMaximumWidth(80)
+        self.game_combo.setMaximumHeight(20)
+        for item in self.game_data.keys():
+            self.game_combo.addItem(item)
+        widgts.append(self.game_combo)
+        self.game_combo.setCurrentIndex(-1)
+        self.game_combo.activated[str].connect(self.set_cur_game)
+        return widgts
 
-#         self.game_combo.activated[str].connect(self.set_cur_game)
-#         return widgts
+    def set_cur_game(self,game):
+        self.game = game
+        print(game,self.game_data[game])
+        if self.game_data[game] == 1:
+            self.show_players(game)
 
-#     def set_cur_game(self,game):
-#         self.game = game
-#         print(game,self.game_data[game])
-#         if self.game_data[game] == 1:
-#             self.show_players(game)
+    def get_right_widgets(self):
+        players = get_players()
+        widgts = []
+
+        for p in players:
+            data = [p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
+            data = ['' if d is None else d for d in data]
+            info = '{: <8} {: <8} {: <2} {: <2} {: <10} {: <12}'.format(*data)
+            widgts.append(QLabel(info))
+        return widgts
 
 #     def show_players(self,game):
 #         game_sex = get_games_sex()
@@ -145,6 +170,7 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.information(self,"数据错误,请修改后重新导入！",info)
             else:
                 QMessageBox.information(self,"提示：",'数据导入成功！')
+                self.add_team_ui()
 
     def clear_data_firm(self):
         reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)

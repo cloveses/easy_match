@@ -76,3 +76,8 @@ def get_players(sex=None):
     else:
         players = select(p for p in Player)[:]
     return players
+
+@db_session
+def has_data():
+    if exists(p for p in Player) and exists(g for g in Games):
+        return True

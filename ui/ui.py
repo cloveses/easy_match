@@ -85,8 +85,14 @@ class Ui_MainWindow(QMainWindow):
 
     #     qbtn.clicked.connect(self.test)
 
-    # def test(self):
-    #     self.right_layout.addWidget(QLabel('NEWWW'),2,0)
+    def test(self):
+        centralwidget = QWidget()
+        test_layout = QHBoxLayout(self.centralwidget)
+        test_layout.addWidget(QLabel('kkkkkkkkkkkkkkkkkkk'))
+        self.removeWidget(self.centralwidget)
+        self.setCentralWidget(centralwidget)
+        self.update()
+        self.repaint()
 
 #         main_form = QFormLayout()
 #         left_widgt = QWidget(None)
@@ -146,6 +152,8 @@ class Ui_MainWindow(QMainWindow):
         return widgts
 
     def show_players(self,game):
+        self.test()
+
         game_sex = get_games_sex()
         sex = game_sex[game]
         self.players = get_players(sex)
@@ -157,9 +165,6 @@ class Ui_MainWindow(QMainWindow):
             print('abc')
             self.right_layout.addWidget(cb)
         self.right_layout.addStretch()
-            # cb.show()
-        # self.update()
-
 
 
     def retranslateUi(self, MainWindow):

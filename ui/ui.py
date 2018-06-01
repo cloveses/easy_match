@@ -1,3 +1,4 @@
+import time
 from models.gather import has_data,clear_data,load_data,get_games,get_games_sex,get_players
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QPushButton,QCheckBox,QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
@@ -52,6 +53,8 @@ class Ui_MainWindow(QMainWindow):
 
         if has_data():
             self.add_team_ui()
+            # time.sleep(2)
+            # self.centralwidget.hide()
 
     def add_team_ui(self):
         self.centralwidget = QWidget()
@@ -60,24 +63,25 @@ class Ui_MainWindow(QMainWindow):
         self.left_layout = MyQVBoxLayout()
         self.right_layout = QVBoxLayout()
 
-        qbtn = QPushButton('1')
-        qbtn.resize(qbtn.minimumSize())
-        widgts = self.get_left_widgts()
+        # qbtn = QPushButton('1')
+        # qbtn.resize(qbtn.minimumSize())
+        self.left_widgts = self.get_left_widgts()
         # self.left_layout.addWidget(qbtn)
         # self.left_layout.addWidget(QLabel('def'))
-        for widgt in widgts:
+        for widgt in self.left_widgts:
             self.left_layout.addWidget(widgt)
         self.left_layout.addStretch()
         # self.right_layout.addWidget(QLabel('aaaa'),0,0)
         # self.right_layout.addWidget(QLabel('bbbb'),1,0)
-        widgts = self.get_right_widgets()
-        for widgt in widgts:
+        self.right_widgts = self.get_right_widgets()
+        for widgt in self.right_widgts:
             self.right_layout.addWidget(widgt)
         self.right_layout.addStretch()
         self.form_layout.addLayout(self.left_layout)
         self.form_layout.addLayout(self.right_layout)
 
         self.setCentralWidget(self.centralwidget)
+
 
     #     qbtn.clicked.connect(self.test)
 
@@ -141,17 +145,20 @@ class Ui_MainWindow(QMainWindow):
             widgts.append(QLabel(info))
         return widgts
 
-#     def show_players(self,game):
-#         game_sex = get_games_sex()
-#         sex = game_sex[game]
-#         self.players = get_players(sex)
-#         self.p_checkboxes = [QCheckBox(' '.join((p.name,p.idcode))) for p in self.players]
-#         for cb in self.p_checkboxes:
-#             cb.toggle()
-#             print('abc')
-#             self.right_widgt_layout.addWidget(cb)
-#             cb.show()
-#         self.update()
+    def show_players(self,game):
+        game_sex = get_games_sex()
+        sex = game_sex[game]
+        self.players = get_players(sex)
+        self.p_checkboxes = [QCheckBox(' '.join((p.name,p.idcode))) for p in self.players]
+        for w in self.right_widgts:
+            w.hide()
+        for cb in self.p_checkboxes:
+            cb.toggle()
+            print('abc')
+            self.right_layout.addWidget(cb)
+        self.right_layout.addStretch()
+            # cb.show()
+        # self.update()
 
 
 

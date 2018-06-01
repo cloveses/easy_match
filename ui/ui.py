@@ -87,12 +87,14 @@ class Ui_MainWindow(QMainWindow):
 
     def test(self):
         centralwidget = QWidget()
-        test_layout = QHBoxLayout(self.centralwidget)
+        test_layout = QHBoxLayout(centralwidget)
         test_layout.addWidget(QLabel('kkkkkkkkkkkkkkkkkkk'))
-        self.removeWidget(self.centralwidget)
+        # self.removeWidget(self.centralwidget)
+        self.takeCentralWidget()
         self.setCentralWidget(centralwidget)
-        self.update()
-        self.repaint()
+        # self.show()
+        # self.update()
+        # self.repaint()
 
 #         main_form = QFormLayout()
 #         left_widgt = QWidget(None)

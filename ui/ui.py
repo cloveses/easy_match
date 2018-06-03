@@ -1,7 +1,8 @@
 import time
 from models.gather import has_data,clear_data,load_data,get_games,get_games_sex,get_players
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QPushButton,QCheckBox,QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction,QPushButton,QCheckBox,QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
 
 class MyQVBoxLayout(QVBoxLayout):
     def maximumSize(self):
@@ -29,6 +30,11 @@ class Ui_MainWindow(QMainWindow):
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
         MainWindow.setMenuBar(self.menubar)
+
+        tool_act = QAction(QIcon(),'abc',self)
+        tool_act.triggered.connect(self.test_tool)
+        self.toolbar = self.addToolBar('Mytool')
+        self.toolbar.addAction(tool_act)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -95,6 +101,9 @@ class Ui_MainWindow(QMainWindow):
         # self.show()
         # self.update()
         # self.repaint()
+
+    def test_tool(self):
+        print('abccc')
 
 #         main_form = QFormLayout()
 #         left_widgt = QWidget(None)

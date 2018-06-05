@@ -57,10 +57,21 @@ class Ui_MainWindow(QMainWindow):
         self.action_init.triggered.connect(self.clear_data_firm)
         self.action_import_data.triggered.connect(self.get_data_file)
 
-        if has_data():
-            self.add_team_ui()
+        self.add_first_ui()
+
+        # if has_data():
+        #     self.add_team_ui()
             # time.sleep(2)
             # self.centralwidget.hide()
+
+    def add_first_ui(self):
+        if has_data():
+            self.centralwidget = QWidget()
+            self.centralwidget.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
+
+            self.mymain_frame = QScrollArea(self)
+            self.mymain_frame.setWidget(self.centralwidget)
+            
 
     def add_team_ui(self):
         self.centralwidget = QWidget()

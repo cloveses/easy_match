@@ -27,7 +27,9 @@ class MyUi(QMainWindow):
     def edit_cell(self,row,col):
         item = self.wdgt.item(row,col)
         txt = item.text()
-        print(txt)
+        print(txt,self.wdgt.currentRow())
+
+# removeRow(currentRow())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

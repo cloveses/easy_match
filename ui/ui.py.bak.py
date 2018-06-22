@@ -2,12 +2,7 @@ import time
 from models.gather import has_data,clear_data,load_data,get_games,get_games_sex,get_players
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
-                            QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,
-                            QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,
-                            QMessageBox,QGridLayout,QFormLayout,QTableView)
-
-from PyQt5.QtGui import QStandardItem,QStandardItemModel
+from PyQt5.QtWidgets import QAction,QPushButton,QCheckBox,QComboBox,QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,QMessageBox,QGridLayout,QFormLayout
 
 class MyQVBoxLayout(QVBoxLayout):
     def maximumSize(self):
@@ -25,6 +20,9 @@ class Ui_MainWindow(QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(775, 532)
+        # self.centralwidget = QtWidgets.QWidget(MainWindow)
+        # self.centralwidget.setObjectName("centralwidget")
+        # MainWindow.setCentralWidget(self.centralwidget)
 
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 775, 23))
@@ -33,11 +31,10 @@ class Ui_MainWindow(QMainWindow):
         self.menu.setObjectName("menu")
         MainWindow.setMenuBar(self.menubar)
 
-        mgr_player = QAction(QIcon(),'运动员管理',self)
-        mgr_player.triggered.connect(self.edit_player)
-
+        tool_act = QAction(QIcon(),'abc',self)
+        tool_act.triggered.connect(self.test_tool)
         self.toolbar = self.addToolBar('Mytool')
-        self.toolbar.addAction(mgr_player)
+        self.toolbar.addAction(tool_act)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -67,18 +64,14 @@ class Ui_MainWindow(QMainWindow):
             # time.sleep(2)
             # self.centralwidget.hide()
 
-    def add_first_ui(self,info="Welcome!"):
-        self.main_frame = QScrollArea(self)
-        self.main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
-        self.wel = QLabel(info)
+    def add_first_ui(self):
+        if has_data():
+            self.centralwidget = QWidget()
+            self.centralwidget.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
 
-        boxlayout = QHBoxLayout()
-        boxlayout.addStretch()
-        boxlayout.addWidget(self.wel)
-        boxlayout.addStretch()
-
-        self.main_frame.setLayout(boxlayout)
-        self.setCentralWidget(self.main_frame)
+            self.mymain_frame = QScrollArea(self)
+            self.mymain_frame.setWidget(self.centralwidget)
+            
 
     def add_team_ui(self):
         self.centralwidget = QWidget()
@@ -122,10 +115,6 @@ class Ui_MainWindow(QMainWindow):
 
     def test_tool(self):
         print('abccc')
-        self.wel.setText('akkkkkkkkkkkk!')
-        self.takeCentralWidget()
-        self.setCentralWidget(QLabel('kkkdkddaaaaaaaaaaaaaa'))
-
 
 #         main_form = QFormLayout()
 #         left_widgt = QWidget(None)
@@ -215,47 +204,11 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.information(self,"数据错误,请修改后重新导入！",info)
             else:
                 QMessageBox.information(self,"提示：",'数据导入成功！')
-                # self.add_team_ui()
+                self.add_team_ui()
 
     def clear_data_firm(self):
         reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        self.takeCentralWidget()
         if reply == QMessageBox.Yes:
             clear_data()
-            self.add_first_ui('数据已全部清空！')
-
-    def edit_player(self):
-        players = get_players()
-        datas = []
-        for p in players:
-            data = [p.id,p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
-            data = ['' if d is None else d for d in datas]
-            datas.append(data)
-        if datas:
-            self.takeCentralWidget()
-            main_frame = QScrollArea(self)
-            main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
-
-            self.player_tabview = QTableView()
-            r,c = len(datas),len(datas[0])
-            self.player_model = QStandardItemModel(r,c)
-            for r,rdata in enumerate(datas):
-                for c,cell in enumerate(rdata):
-                    it = QStandardItem(str(cell))
-                    if c == 0:
-                        it.setEditable(False)
-                    self.player_model.setItem(r,c,it)
-
-            self.player_tabview.setModel(self.player_model)
-
-
-            boxlayout = QHBoxLayout()
-            boxlayout.addStretch()
-            boxlayout.addWidget(self.player_tabview)
-            boxlayout.addStretch()
-
-            main_frame.setLayout(boxlayout)
-            self.setCentralWidget(main_frame)
-
 
 # # QApplication.processEvents()

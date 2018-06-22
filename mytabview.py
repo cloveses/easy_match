@@ -17,6 +17,8 @@ class MyUi(QMainWindow):
         for r in range(4):
             for c in range(3):
                 it = QStandardItem('a {},c {}'.format(r,c))
+                if c == 0:
+                    it.setEditable(False)
                 self.model.setItem(r,c,it)
         self.wdgt.setModel(self.model)
         
@@ -24,14 +26,19 @@ class MyUi(QMainWindow):
         self.wdgt.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
         self.wdgt.setMinimumSize(1500,800)
 
+        # self.wdgt.setColumnHidden(0,True)
         scroll = QScrollArea(self)
         scroll.setWidget(self.wdgt)
         self.setCentralWidget(scroll)
 
     def pr(self):
         print('jjkkk')
-        print(self.wdgt.currentIndex().row(),self.wdgt.currentIndex().column(),self.wdgt.currentIndex().data())
 
+        print(self.wdgt.currentIndex().row(),self.wdgt.currentIndex().column(),self.wdgt.currentIndex().data())
+        r = self.wdgt.currentIndex().row()
+        c = self.wdgt.currentIndex().column()
+        item = self.model.index(r,0)
+        print(item.data())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

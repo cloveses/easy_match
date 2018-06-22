@@ -229,8 +229,9 @@ class Ui_MainWindow(QMainWindow):
         datas = []
         for p in players:
             data = [p.id,p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
-            data = ['' if d is None else d for d in datas]
+            data = ['' if d is None else d for d in data]
             datas.append(data)
+        head_lst = ['索引号','姓名','身份证号','性别','年龄','工作单位','电话']
         if datas:
             self.takeCentralWidget()
             main_frame = QScrollArea(self)
@@ -239,6 +240,7 @@ class Ui_MainWindow(QMainWindow):
             self.player_tabview = QTableView()
             r,c = len(datas),len(datas[0])
             self.player_model = QStandardItemModel(r,c)
+            self.player_model.setHorizontalHeaderLabels(head_lst)
             for r,rdata in enumerate(datas):
                 for c,cell in enumerate(rdata):
                     it = QStandardItem(str(cell))
@@ -246,16 +248,24 @@ class Ui_MainWindow(QMainWindow):
                         it.setEditable(False)
                     self.player_model.setItem(r,c,it)
 
+            self.player_model.itemChanged.connect(self.edit_cell)
+
             self.player_tabview.setModel(self.player_model)
 
 
             boxlayout = QHBoxLayout()
-            boxlayout.addStretch()
-            boxlayout.addWidget(self.player_tabview)
-            boxlayout.addStretch()
+            # boxlayout.addStretch(1)
+            boxlayout.addWidget(self.player_tabview,18)
+            # boxlayout.addStretch(1)
 
             main_frame.setLayout(boxlayout)
             self.setCentralWidget(main_frame)
 
+    def edit_cell(self):
+        r = self.player_tabview.currentIndex().row()
+        c = self.player_tabview.currentIndex().column()
+        curr_data = self.player_tabview.currentIndex().data()
+        item = self.player_model.index(r,0)
+        print(curr_data,item.data())
 
 # # QApplication.processEvents()

@@ -1,6 +1,7 @@
 import time
-from models.mydb import Player
-from models.gather import del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players
+import functools
+from models.mydb import Player,PlayGround
+from models.gather import del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -19,6 +20,7 @@ class Ui_MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.select_checkbox_num = 0
+        self.all_widgets = []
         self.setupUi(self)
         self.retranslateUi(self)
 
@@ -35,10 +37,14 @@ class Ui_MainWindow(QMainWindow):
         MainWindow.setMenuBar(self.menubar)
 
         mgr_player = QAction(QIcon(),'运动员管理',self)
-        mgr_player.triggered.connect(self.edit_player)
+        mgr_player.triggered.connect(functools.partial(self.edit_player,*self.get_player_parmas()))
+
+        mgr_playground = QAction(QIcon(),'场地管理',self)
+        mgr_playground.triggered.connect(functools.partial(self.edit_player,*self.get_playground_parmas()))
 
         self.toolbar = self.addToolBar('Mytool')
         self.toolbar.addAction(mgr_player)
+        self.toolbar.addAction(mgr_playground)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -225,14 +231,25 @@ class Ui_MainWindow(QMainWindow):
             clear_data()
             self.add_first_ui('数据已全部清空！')
 
-    def edit_player(self):
-        players = get_players()
+    def get_player_parmas(self):
+        head_lst = ['索引号','姓名','身份证号','性别','年龄','工作单位','电话']
+        keys = ['id','name','idcode','sex','age','work_place','tel']
+        return get_players,keys,head_lst,Player
+
+    def get_playground_parmas(self):
+        head_lst = ['索引号','场地名','使用状态','备注']
+        keys = ['id','name','using','memo']
+        return get_playgrounds,keys,head_lst,PlayGround
+
+    def edit_player(self,getfunc,keys,head_lst,obj):
+        model_objs = getfunc()
         datas = []
-        for p in players:
-            data = [p.id,p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
+        for model_obj in model_objs:
+            # data = [p.id,p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
+            data = [getattr(model_obj,key) for key in keys]
             data = ['' if d is None else d for d in data]
             datas.append(data)
-        head_lst = ['索引号','姓名','身份证号','性别','年龄','工作单位','电话']
+        # head_lst = ['索引号','姓名','身份证号','性别','年龄','工作单位','电话']
         if datas:
             self.takeCentralWidget()
             main_frame = QScrollArea(self)
@@ -248,8 +265,9 @@ class Ui_MainWindow(QMainWindow):
                     if c == 0:
                         it.setEditable(False)
                     self.player_model.setItem(r,c,it)
-
-            self.player_model.itemChanged.connect(self.edit_cell)
+            # keys = ['id','name','idcode','sex','age','work_place','tel']
+            edit_cell = functools.partial(self.edit_cell,obj,keys)
+            self.player_model.itemChanged.connect(edit_cell)
 
             self.player_tabview.setModel(self.player_model)
 
@@ -260,28 +278,28 @@ class Ui_MainWindow(QMainWindow):
             # boxlayout.addStretch(1)
 
             del_btn = QPushButton('删除')
-            del_btn.clicked.connect(self.del_row)
+            del_btn.clicked.connect(functools.partial(self.del_row,obj))
             boxlayout.addWidget(del_btn)
 
             main_frame.setLayout(boxlayout)
             self.setCentralWidget(main_frame)
 
-    def edit_cell(self):
-        keys = ['id','name','idcode','sex','age','work_place','tel']
+    def edit_cell(self,obj,keys):
         r = self.player_tabview.currentIndex().row()
         c = self.player_tabview.currentIndex().column()
         curr_data = self.player_tabview.currentIndex().data()
         item = self.player_model.index(r,0)
-        # print(curr_data,item.data(),c)
         param = dict()
         param[keys[c]] = curr_data
-        save_cell(Player,int(item.data()),param)
+        save_cell(obj,int(item.data()),param)
 
-    def del_row(self):
-        r = self.player_tabview.currentIndex().row()
-        item = self.player_model.index(r,0)
-        print(int(item.data()))
-        del_rowdb(Player,int(item.data()))
-        self.player_model.removeRow(r)
+    def del_row(self,obj):
+        reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            r = self.player_tabview.currentIndex().row()
+            item = self.player_model.index(r,0)
+            print(int(item.data()))
+            del_rowdb(obj,int(item.data()))
+            self.player_model.removeRow(r)
 
 # # QApplication.processEvents()

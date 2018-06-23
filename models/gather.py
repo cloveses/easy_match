@@ -78,6 +78,14 @@ def get_players(sex=None):
     return players
 
 @db_session
+def get_playgrounds(using=None):
+    if using is not None:
+        pgs = select(p for p in PlayGround if p.using==using)[:]
+    else:
+        pgs = select(p for p in PlayGround)[:]
+    return pgs
+
+@db_session
 def has_data():
     if exists(p for p in Player) and exists(g for g in Games):
         return True

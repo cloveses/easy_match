@@ -1,5 +1,6 @@
 import time
-from models.gather import has_data,clear_data,load_data,get_games,get_games_sex,get_players
+from models.mydb import Player
+from models.gather import del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -253,19 +254,34 @@ class Ui_MainWindow(QMainWindow):
             self.player_tabview.setModel(self.player_model)
 
 
-            boxlayout = QHBoxLayout()
+            boxlayout = QVBoxLayout()
             # boxlayout.addStretch(1)
             boxlayout.addWidget(self.player_tabview,18)
             # boxlayout.addStretch(1)
+
+            del_btn = QPushButton('删除')
+            del_btn.clicked.connect(self.del_row)
+            boxlayout.addWidget(del_btn)
 
             main_frame.setLayout(boxlayout)
             self.setCentralWidget(main_frame)
 
     def edit_cell(self):
+        keys = ['id','name','idcode','sex','age','work_place','tel']
         r = self.player_tabview.currentIndex().row()
         c = self.player_tabview.currentIndex().column()
         curr_data = self.player_tabview.currentIndex().data()
         item = self.player_model.index(r,0)
-        print(curr_data,item.data())
+        # print(curr_data,item.data(),c)
+        param = dict()
+        param[keys[c]] = curr_data
+        save_cell(Player,int(item.data()),param)
+
+    def del_row(self):
+        r = self.player_tabview.currentIndex().row()
+        item = self.player_model.index(r,0)
+        print(int(item.data()))
+        del_rowdb(Player,int(item.data()))
+        self.player_model.removeRow(r)
 
 # # QApplication.processEvents()

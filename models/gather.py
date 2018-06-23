@@ -81,3 +81,11 @@ def get_players(sex=None):
 def has_data():
     if exists(p for p in Player) and exists(g for g in Games):
         return True
+
+@db_session
+def save_cell(obj,key,data):
+    obj[key].set(**data)
+
+@db_session
+def del_rowdb(obj,key):
+    obj[key].delete()

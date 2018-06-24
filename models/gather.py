@@ -86,6 +86,10 @@ def get_playgrounds(using=None):
     return pgs
 
 @db_session
+def get_games():
+    return select(g for g in Games)[:]
+
+@db_session
 def has_data():
     if exists(p for p in Player) and exists(g for g in Games):
         return True

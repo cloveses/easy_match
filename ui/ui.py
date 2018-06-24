@@ -1,7 +1,7 @@
 import time
 import functools
-from models.mydb import Player,PlayGround
-from models.gather import del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
+from models.mydb import Player,PlayGround,Games
+from models.gather import get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -42,9 +42,13 @@ class Ui_MainWindow(QMainWindow):
         mgr_playground = QAction(QIcon(),'场地管理',self)
         mgr_playground.triggered.connect(functools.partial(self.edit_player,*self.get_playground_parmas()))
 
+        mgr_game = QAction(QIcon(),'竞赛项目',self)
+        mgr_game.triggered.connect(functools.partial(self.edit_player,*self.get_game_parmas()))
+
         self.toolbar = self.addToolBar('Mytool')
         self.toolbar.addAction(mgr_player)
         self.toolbar.addAction(mgr_playground)
+        self.toolbar.addAction(mgr_game)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -236,10 +240,16 @@ class Ui_MainWindow(QMainWindow):
         keys = ['id','name','idcode','sex','age','work_place','tel']
         return get_players,keys,head_lst,Player
 
+
     def get_playground_parmas(self):
         head_lst = ['索引号','场地名','使用状态','备注']
         keys = ['id','name','using','memo']
         return get_playgrounds,keys,head_lst,PlayGround
+
+    def get_game_parmas(self):
+        head_lst = ['索引号','竞赛项目','队员人数','队员性别','备注']
+        keys = ['id','name','team_num','sex','memo']
+        return get_games,keys,head_lst,Games
 
     def edit_player(self,getfunc,keys,head_lst,obj):
         model_objs = getfunc()

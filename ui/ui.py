@@ -102,7 +102,7 @@ class Ui_MainWindow(QMainWindow):
             self.game_sub_menus.append(QtWidgets.QAction(MainWindow))
         for game_sub_menu,game in zip(self.game_sub_menus,self.games):
             game_sub_menu.setObjectName(game.name)
-            game_sub_menu.triggered.connect(self.pr)
+            game_sub_menu.triggered.connect(functools.partial(self.select_player,game.id,game.name,game.team_num,game.sex))
             game_sub_menu.setText(QtCore.QCoreApplication.translate("MainWindow", "&{}".format(game.name)))
         for game_sub_menu in self.game_sub_menus:
             self.menu_team.addAction(game_sub_menu)
@@ -341,9 +341,58 @@ class Ui_MainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             r = self.player_tabview.currentIndex().row()
             item = self.player_model.index(r,0)
-            print(int(item.data()))
+            # print(int(item.data()))
             del_rowdb(obj,int(item.data()))
             self.player_model.removeRow(r)
             if obj == Games:
                 self.updateMenu(self)
+
+    def select_player(self,gid,gname,gteam_num,gsex):
+        # 新建团队
+        players = get_players(gsex)
+        head_lst = ['索引号','姓名','身份证号','性别','年龄','工作单位','电话']
+        keys = ['id','name','idcode','sex','age','work_place','tel']
+        datas =  []
+        for player in players:
+            data = [getattr(player,key) for key in keys]
+            data = ['' if d is None else d for d in data]
+            datas.append(data)
+        if datas:
+            self.takeCentralWidget()
+            main_frame = QScrollArea(self)
+            main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
+
+            self.player_tabview = QTableView()
+            r,c = len(datas),len(datas[0])
+            self.player_model = QStandardItemModel(r,c)
+            self.player_model.setHorizontalHeaderLabels(head_lst)
+            for r,rdata in enumerate(datas):
+                for c,cell in enumerate(rdata):
+                    it = QStandardItem(str(cell))
+                    if c == 0:
+                        it.setEditable(False)
+                    self.player_model.setItem(r,c,it)
+            self.player_tabview.setModel(self.player_model)
+
+            boxlayout = QVBoxLayout()
+            # boxlayout.addStretch(1)
+            boxlayout.addWidget(self.player_tabview,18)
+            # boxlayout.addStretch(1)
+
+            new_btn = QPushButton('新建团队')
+            new_btn.clicked.connect(functools.partial(self.add_team,gid,gteam_num,gsex))
+            boxlayout.addWidget(new_btn)
+
+            main_frame.setLayout(boxlayout)
+            self.setCentralWidget(main_frame)
+
+    def add_team(self,gid,gteam_num,gsex):
+        rows = set()
+        for selected_model_index in self.player_tabview.selectedIndexes():
+            rows.add(selected_model_index.row())
+        # if gteam_num == 1:
+        #     new_team(gid,pids)
+        # if gteam_num > 1:
+        #     new_team(gid,pids,flag=1)
+        print(rows)
 # # QApplication.processEvents()

@@ -21,7 +21,9 @@ class Ui_MainWindow(QMainWindow):
         super().__init__()
         self.select_checkbox_num = 0
         self.all_widgets = []
+        self.game_sub_menus = []
         self.setupUi(self)
+        self.updateMenu(self)
         self.retranslateUi(self)
 
 
@@ -32,8 +34,13 @@ class Ui_MainWindow(QMainWindow):
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 775, 23))
         self.menubar.setObjectName("menubar")
+
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
+
+        self.menu_team = QtWidgets.QMenu(self.menubar)
+        self.menu_team.setObjectName("menu_team")
+
         MainWindow.setMenuBar(self.menubar)
 
         mgr_player = QAction(QIcon(),'运动员管理',self)
@@ -60,10 +67,15 @@ class Ui_MainWindow(QMainWindow):
         self.action_import_data = QtWidgets.QAction(MainWindow)
         self.action_import_data.setObjectName("action_import_data")
 
+        self.action_gamemgr = QtWidgets.QAction(MainWindow)
+        self.action_gamemgr.setObjectName("action_gamemgr")
+
         self.menu.addAction(self.action_init)
         self.menu.addAction(self.action_import_data)
         self.menu.addSeparator()
+
         self.menubar.addAction(self.menu.menuAction())
+        self.menubar.addAction(self.menu_team.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -77,6 +89,23 @@ class Ui_MainWindow(QMainWindow):
         #     self.add_team_ui()
             # time.sleep(2)
             # self.centralwidget.hide()
+
+    def pr(self):
+        print('prrrrr')
+
+    def updateMenu(self,MainWindow):
+        """添加或更新为每个竞赛项目组队的‘参赛队组建’菜单"""
+        self.games = get_games()
+        for game_sub_menu in self.game_sub_menus:
+            self.menu_team.removeAction(game_sub_menu)
+        for game in self.games:
+            self.game_sub_menus.append(QtWidgets.QAction(MainWindow))
+        for game_sub_menu,game in zip(self.game_sub_menus,self.games):
+            game_sub_menu.setObjectName(game.name)
+            game_sub_menu.triggered.connect(self.pr)
+            game_sub_menu.setText(QtCore.QCoreApplication.translate("MainWindow", "&{}".format(game.name)))
+        for game_sub_menu in self.game_sub_menus:
+            self.menu_team.addAction(game_sub_menu)
 
     def add_first_ui(self,info="Welcome!"):
         self.main_frame = QScrollArea(self)
@@ -218,6 +247,8 @@ class Ui_MainWindow(QMainWindow):
         self.action_init.setText(_translate("MainWindow", "&清理数据"))
         self.action_import_data.setText(_translate("MainWindow", "&导入数据"))
 
+        self.menu_team.setTitle(_translate("MainWindow", "&参赛队组建"))
+
     def get_data_file(self):
         fname = QFileDialog.getOpenFileName(self, '打开文件', '.\\')
         if fname[0]:
@@ -302,6 +333,8 @@ class Ui_MainWindow(QMainWindow):
         param = dict()
         param[keys[c]] = curr_data
         save_cell(obj,int(item.data()),param)
+        if obj == Games and 'name' in param:
+            self.updateMenu(self)
 
     def del_row(self,obj):
         reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -311,5 +344,6 @@ class Ui_MainWindow(QMainWindow):
             print(int(item.data()))
             del_rowdb(obj,int(item.data()))
             self.player_model.removeRow(r)
-
+            if obj == Games:
+                self.updateMenu(self)
 # # QApplication.processEvents()

@@ -101,3 +101,21 @@ def save_cell(obj,key,data):
 @db_session
 def del_rowdb(obj,key):
     obj[key].delete()
+
+@db_session
+def new_team(gid,pids,flag=0):
+    game = Games[gid]
+    players = [Player[pid] for pid in pids]
+    if flag:
+        for player in players:
+            team = Team(name=player.name,game=game)
+            team.players.add(player)
+            game.team.add(team)
+            player.team.add(team)
+
+    else:
+        team = Team(name='-'.join([player.name for player in players]),game=game)
+        for p in players:
+            team.players.add(p)
+            p.team.add(team)
+        game.team.add(team)

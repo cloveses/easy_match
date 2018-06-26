@@ -1,7 +1,7 @@
 import time
 import functools
 from models.mydb import Player,PlayGround,Games
-from models.gather import get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
+from models.gather import new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -90,8 +90,8 @@ class Ui_MainWindow(QMainWindow):
             # time.sleep(2)
             # self.centralwidget.hide()
 
-    def pr(self):
-        print('prrrrr')
+    # def pr(self):
+    #     print('prrrrr')
 
     def updateMenu(self,MainWindow):
         """添加或更新为每个竞赛项目组队的‘参赛队组建’菜单"""
@@ -348,7 +348,7 @@ class Ui_MainWindow(QMainWindow):
                 self.updateMenu(self)
 
     def select_player(self,gid,gname,gteam_num,gsex):
-        # 新建团队
+        # 新建团队UI
         players = get_players(gsex)
         head_lst = ['索引号','姓名','身份证号','性别','年龄','工作单位','电话']
         keys = ['id','name','idcode','sex','age','work_place','tel']
@@ -387,12 +387,20 @@ class Ui_MainWindow(QMainWindow):
             self.setCentralWidget(main_frame)
 
     def add_team(self,gid,gteam_num,gsex):
+        # 新建团队方法
         rows = set()
+        pids = []
         for selected_model_index in self.player_tabview.selectedIndexes():
             rows.add(selected_model_index.row())
-        # if gteam_num == 1:
-        #     new_team(gid,pids)
-        # if gteam_num > 1:
-        #     new_team(gid,pids,flag=1)
-        print(rows)
+        for r in rows:
+            item = self.player_model.index(r,0)
+            pids.append(item.data())
+        if gteam_num == 1:
+            new_team(gid,pids)
+        if gteam_num > 1 and len(rows) == gteam_num:
+            new_team(gid,pids,flag=1)
+        else:
+            QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
+
+
 # # QApplication.processEvents()

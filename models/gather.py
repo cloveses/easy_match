@@ -4,7 +4,7 @@ from .mydb import *
 @db_session
 def clear_data():
     for o in (PlayGround,Games,Player,Team,PlayDate,Face,Group)[::-1]:
-        select(r for r in o).delete(bulk=True)
+        select(r for r in o).delete()
 
 def team_num2int(data):
     default = 1

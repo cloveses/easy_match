@@ -6,7 +6,7 @@ db = Database()
 class PlayGround(db.Entity):
     name = Required(str)
     using = Required(bool,sql_default=False,default=False)
-    face = Optional('Face')
+    face = Optional('Face', cascade_delete=True)
     memo = Optional(str,nullable=True)
 
 class Games(db.Entity):
@@ -38,14 +38,15 @@ class PlayDate(db.Entity):
 
 class Face(db.Entity):
     times = Required(int)
-    teama = Required('Team', reverse="facea")
-    teamb = Required('Team', reverse="faceb")
+    teama = Required('Team', reverse="facea", cascade_delete=True)
+    teamb = Required('Team', reverse="faceb", cascade_delete=True)
     scorea = Optional(int,nullable=True)
     scoreb = Optional(int,nullable=True)
     playground = Optional(PlayGround)
 
 class Group(db.Entity):
     name = Required(str)
+    game = Required('Games')
     teams = Set(Team)
 
 # set_sql_debug(True)

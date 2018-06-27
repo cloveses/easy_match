@@ -26,7 +26,6 @@ class Ui_MainWindow(QMainWindow):
         self.updateMenu(self)
         self.retranslateUi(self)
 
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(775, 532)
@@ -108,6 +107,7 @@ class Ui_MainWindow(QMainWindow):
             self.menu_team.addAction(game_sub_menu)
 
     def add_first_ui(self,info="Welcome!"):
+        self.takeCentralWidget()
         self.main_frame = QScrollArea(self)
         self.main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
         self.wel = QLabel(info)
@@ -242,7 +242,7 @@ class Ui_MainWindow(QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "易用竞赛管理系统"))
         self.menu.setTitle(_translate("MainWindow", "&管理数据"))
         self.action_init.setText(_translate("MainWindow", "&清理数据"))
         self.action_import_data.setText(_translate("MainWindow", "&导入数据"))
@@ -257,6 +257,7 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.information(self,"数据错误,请修改后重新导入！",info)
             else:
                 QMessageBox.information(self,"提示：",'数据导入成功！')
+                self.add_first_ui('数据已导入！')
                 # self.add_team_ui()
 
     def clear_data_firm(self):
@@ -379,7 +380,7 @@ class Ui_MainWindow(QMainWindow):
             boxlayout.addWidget(self.player_tabview,18)
             # boxlayout.addStretch(1)
 
-            new_btn = QPushButton('新建团队')
+            new_btn = QPushButton('新建团队({})'.format(gname))
             new_btn.clicked.connect(functools.partial(self.add_team,gid,gteam_num,gsex))
             boxlayout.addWidget(new_btn)
 
@@ -397,10 +398,11 @@ class Ui_MainWindow(QMainWindow):
             pids.append(item.data())
         if gteam_num == 1:
             new_team(gid,pids)
-        if gteam_num > 1 and len(rows) == gteam_num:
-            new_team(gid,pids,flag=1)
-        else:
-            QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
+        if gteam_num > 1:
+            if len(rows) == gteam_num:
+                new_team(gid,pids,flag=1)
+            else:
+                QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
 
 
 # # QApplication.processEvents()

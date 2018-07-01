@@ -15,6 +15,7 @@ class Games(db.Entity):
     sex = Optional(str,nullable=True)
     memo = Optional(str,nullable=True)
     team = Set('Team')
+    group = Optional('Group')
 
 class Player(db.Entity):
     name = Required(str)

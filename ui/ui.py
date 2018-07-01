@@ -259,6 +259,7 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.information(self,"提示：",'数据导入成功！')
                 self.add_first_ui('数据已导入！')
                 # self.add_team_ui()
+                self.updateMenu(self)
 
     def clear_data_firm(self):
         reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)

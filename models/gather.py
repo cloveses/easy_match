@@ -104,21 +104,33 @@ def del_rowdb(obj,key):
 
 @db_session
 def new_team(gid,pids,flag=0):
+    infos = []
     game = Games[gid]
     players = [Player[pid] for pid in pids]
     if flag:
         for player in players:
-            team = Team(name=player.name,game=game)
-            team.players.add(player)
-            game.team.add(team)
-            player.team.add(team)
-
+            if any([player not in t.players for t in game.team]):
+                infos.append(player.name)
+            else:
+                team = Team(name=player.name,game=game)
+                team.players.add(player)
+                game.team.add(team)
+                player.team.add(team)
+        if infos:
+            infos = ' '.join(infos) + '不能多次参加一个项目！'
+        else:
+            infos = ''
     else:
-        team = Team(name='-'.join([player.name for player in players]),game=game)
-        for p in players:
-            team.players.add(p)
-            p.team.add(team)
-        game.team.add(team)
+        if any([players.intersection(t.players) for t in game.team]):
+            infos = '一个人不能多次参加一个项目！'
+        else:
+            team = Team(name='-'.join([player.name for player in players]),game=game)
+            for p in players:
+                team.players.add(p)
+                p.team.add(team)
+            game.team.add(team)
+            
+    return infos
 
 @db_session
 def get_team_datas():

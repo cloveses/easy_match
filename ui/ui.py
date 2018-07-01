@@ -1,7 +1,7 @@
 import time
 import functools
-from models.mydb import Player,PlayGround,Games
-from models.gather import new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
+from models.mydb import Player,PlayGround,Games,Team
+from models.gather import get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -51,10 +51,14 @@ class Ui_MainWindow(QMainWindow):
         mgr_game = QAction(QIcon(),'竞赛项目',self)
         mgr_game.triggered.connect(functools.partial(self.edit_player,*self.get_game_parmas()))
 
+        mgr_team = QAction(QIcon(),'参赛队',self)
+        mgr_team.triggered.connect(self.edit_team)
+
         self.toolbar = self.addToolBar('Mytool')
         self.toolbar.addAction(mgr_player)
         self.toolbar.addAction(mgr_playground)
         self.toolbar.addAction(mgr_game)
+        self.toolbar.addAction(mgr_team)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -349,6 +353,52 @@ class Ui_MainWindow(QMainWindow):
             if obj == Games:
                 self.updateMenu(self)
 
+    def edit_team(self):
+        datas = get_team_datas()
+        head_lst = ['索引号','队名','项目','分组']
+        if datas:
+            self.takeCentralWidget()
+            main_frame = QScrollArea(self)
+            main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
+
+            self.player_tabview = QTableView()
+            r,c = len(datas),len(datas[0])
+            self.player_model = QStandardItemModel(r,c)
+            self.player_model.setHorizontalHeaderLabels(head_lst)
+            for r,rdata in enumerate(datas):
+                for c,cell in enumerate(rdata):
+                    it = QStandardItem(str(cell))
+                    if c == 0:
+                        it.setEditable(False)
+                    self.player_model.setItem(r,c,it)
+            # keys = ['id','name','idcode','sex','age','work_place','tel']
+            # edit_cell = functools.partial(self.edit_cell,obj,keys)
+            # self.player_model.itemChanged.connect(edit_cell)
+
+            self.player_tabview.setModel(self.player_model)
+
+
+            boxlayout = QVBoxLayout()
+            # boxlayout.addStretch(1)
+            boxlayout.addWidget(self.player_tabview,18)
+            # boxlayout.addStretch(1)
+
+            del_btn = QPushButton('删除')
+            del_btn.clicked.connect(self.del_team)
+            boxlayout.addWidget(del_btn)
+
+            main_frame.setLayout(boxlayout)
+            self.setCentralWidget(main_frame)
+
+    def del_team(self):
+        reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            r = self.player_tabview.currentIndex().row()
+            item = self.player_model.index(r,0)
+            # print(int(item.data()))
+            del_rowdb(Team,int(item.data()))
+            self.player_model.removeRow(r)
+
     def select_player(self,gid,gname,gteam_num,gsex):
         # 新建团队UI
         players = get_players(gsex)
@@ -398,12 +448,15 @@ class Ui_MainWindow(QMainWindow):
             item = self.player_model.index(r,0)
             pids.append(item.data())
         if gteam_num == 1:
-            new_team(gid,pids)
+            new_team(gid,pids,flag=1)
+            QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
         if gteam_num > 1:
             if len(rows) == gteam_num:
-                new_team(gid,pids,flag=1)
+                new_team(gid,pids)
+                QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
             else:
                 QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
+        self.player_tabview.clearSelection()
 
 
 # # QApplication.processEvents()

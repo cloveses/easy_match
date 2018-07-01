@@ -119,3 +119,17 @@ def new_team(gid,pids,flag=0):
             team.players.add(p)
             p.team.add(team)
         game.team.add(team)
+
+@db_session
+def get_team_datas():
+    datas = []
+    for team in select(t for t in Team):
+        data = []
+        data.append(team.id)
+        data.append('-'.join([p.name for p in team.players]))
+        data.append(team.game.name)
+        data.append(team.group.name if team.group else '')
+        datas.append(data)
+    if datas:
+        datas.sort(key=lambda x:x[2])
+    return datas

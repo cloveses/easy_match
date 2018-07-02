@@ -7,7 +7,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
                             QVBoxLayout,QHBoxLayout,QScrollArea,QWidget,QLabel,
                             QMainWindow, QTextEdit, QAction, QApplication,QFileDialog,
-                            QMessageBox,QGridLayout,QFormLayout,QTableView)
+                            QMessageBox,QGridLayout,QFormLayout,QTableView,QDialog,
+                            QLineEdit,QDialogButtonBox)
 
 from PyQt5.QtGui import QStandardItem,QStandardItemModel
 
@@ -391,13 +392,18 @@ class Ui_MainWindow(QMainWindow):
             self.setCentralWidget(main_frame)
 
     def del_team(self):
-        reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            r = self.player_tabview.currentIndex().row()
-            item = self.player_model.index(r,0)
-            # print(int(item.data()))
-            del_rowdb(Team,int(item.data()))
-            self.player_model.removeRow(r)
+        v = MyDialog()
+        # print('....',v.exec_())
+        if v.exec_():
+            name,game = v.get_data()
+            print(name,game)
+        # reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        # if reply == QMessageBox.Yes:
+        #     r = self.player_tabview.currentIndex().row()
+        #     item = self.player_model.index(r,0)
+        #     # print(int(item.data()))
+        #     del_rowdb(Team,int(item.data()))
+        #     self.player_model.removeRow(r)
 
     def select_player(self,gid,gname,gteam_num,gsex):
         # 新建团队UI
@@ -466,3 +472,41 @@ class Ui_MainWindow(QMainWindow):
 
 
 # # QApplication.processEvents()
+
+class MyDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        # self.exec()
+
+    def initUI(self):
+        self.setWindowTitle("新建小组")
+        self.setGeometry(400,400,200,200)
+
+        self.lab_a = QLabel('小组名称:')
+        self.lab_b = QLabel('竞赛项目:')
+
+        self.name_edit = QLineEdit()
+        self.game_item = QComboBox()
+
+        for g in get_games():
+            self.game_item.addItem(g.name,g.id)
+
+        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+
+        self.glayout = QGridLayout()
+
+        self.glayout.addWidget(self.lab_a,0,0)
+        self.glayout.addWidget(self.lab_b,1,0)
+        self.glayout.addWidget(self.name_edit,0,1)
+        self.glayout.addWidget(self.game_item,1,1)
+
+        self.glayout.addWidget(self.buttons,2,1)
+
+        self.buttons.accepted.connect(self.accept)
+        self.buttons.rejected.connect(self.reject)
+
+        self.setLayout(self.glayout)
+
+    def get_data(self):
+        return self.name_edit.text(),self.game_item.itemData(self.game_item.currentIndex())

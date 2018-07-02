@@ -121,7 +121,7 @@ def new_team(gid,pids,flag=0):
         else:
             infos = ''
     else:
-        if any([players.intersection(t.players) for t in game.team]):
+        if any([set(players).intersection(set(t.players)) for t in game.team]):
             infos = '一个人不能多次参加一个项目！'
         else:
             team = Team(name='-'.join([player.name for player in players]),game=game)

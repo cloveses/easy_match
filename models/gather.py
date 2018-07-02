@@ -109,7 +109,7 @@ def new_team(gid,pids,flag=0):
     players = [Player[pid] for pid in pids]
     if flag:
         for player in players:
-            if any([player not in t.players for t in game.team]):
+            if any([player in t.players for t in game.team]):
                 infos.append(player.name)
             else:
                 team = Team(name=player.name,game=game)

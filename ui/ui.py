@@ -448,12 +448,18 @@ class Ui_MainWindow(QMainWindow):
             item = self.player_model.index(r,0)
             pids.append(item.data())
         if gteam_num == 1:
-            new_team(gid,pids,flag=1)
-            QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
+            info = new_team(gid,pids,flag=1)
+            if info:
+                QMessageBox.warning(self,'完成',info,QMessageBox.Ok)
+            else:
+                QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
         if gteam_num > 1:
             if len(rows) == gteam_num:
-                new_team(gid,pids)
-                QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
+                info = new_team(gid,pids)
+                if info:
+                    QMessageBox.warning(self,'完成',info,QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
             else:
                 QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
         self.player_tabview.clearSelection()

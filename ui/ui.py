@@ -129,51 +129,51 @@ class Ui_MainWindow(QMainWindow):
         self.main_frame.setLayout(boxlayout)
         self.setCentralWidget(self.main_frame)
 
-    def add_team_ui(self):
-        self.centralwidget = QWidget()
-        self.form_layout = QHBoxLayout(self.centralwidget)
+    # def add_team_ui(self):
+    #     self.centralwidget = QWidget()
+    #     self.form_layout = QHBoxLayout(self.centralwidget)
 
-        self.left_layout = MyQVBoxLayout()
-        self.right_layout = QVBoxLayout()
+    #     self.left_layout = MyQVBoxLayout()
+    #     self.right_layout = QVBoxLayout()
 
-        # qbtn = QPushButton('1')
-        # qbtn.resize(qbtn.minimumSize())
-        self.left_widgts = self.get_left_widgts()
-        # self.left_layout.addWidget(qbtn)
-        # self.left_layout.addWidget(QLabel('def'))
-        for widgt in self.left_widgts:
-            self.left_layout.addWidget(widgt)
-        self.left_layout.addStretch()
-        # self.right_layout.addWidget(QLabel('aaaa'),0,0)
-        # self.right_layout.addWidget(QLabel('bbbb'),1,0)
-        self.right_widgts = self.get_right_widgets()
-        for widgt in self.right_widgts:
-            self.right_layout.addWidget(widgt)
-        self.right_layout.addStretch()
-        self.form_layout.addLayout(self.left_layout)
-        self.form_layout.addLayout(self.right_layout)
+    #     # qbtn = QPushButton('1')
+    #     # qbtn.resize(qbtn.minimumSize())
+    #     self.left_widgts = self.get_left_widgts()
+    #     # self.left_layout.addWidget(qbtn)
+    #     # self.left_layout.addWidget(QLabel('def'))
+    #     for widgt in self.left_widgts:
+    #         self.left_layout.addWidget(widgt)
+    #     self.left_layout.addStretch()
+    #     # self.right_layout.addWidget(QLabel('aaaa'),0,0)
+    #     # self.right_layout.addWidget(QLabel('bbbb'),1,0)
+    #     self.right_widgts = self.get_right_widgets()
+    #     for widgt in self.right_widgts:
+    #         self.right_layout.addWidget(widgt)
+    #     self.right_layout.addStretch()
+    #     self.form_layout.addLayout(self.left_layout)
+    #     self.form_layout.addLayout(self.right_layout)
 
-        self.setCentralWidget(self.centralwidget)
+    #     self.setCentralWidget(self.centralwidget)
 
 
     #     qbtn.clicked.connect(self.test)
 
-    def test(self):
-        centralwidget = QWidget()
-        test_layout = QHBoxLayout(centralwidget)
-        test_layout.addWidget(QLabel('kkkkkkkkkkkkkkkkkkk'))
-        # self.removeWidget(self.centralwidget)
-        self.takeCentralWidget()
-        self.setCentralWidget(centralwidget)
-        # self.show()
-        # self.update()
-        # self.repaint()
+    # def test(self):
+    #     centralwidget = QWidget()
+    #     test_layout = QHBoxLayout(centralwidget)
+    #     test_layout.addWidget(QLabel('kkkkkkkkkkkkkkkkkkk'))
+    #     # self.removeWidget(self.centralwidget)
+    #     self.takeCentralWidget()
+    #     self.setCentralWidget(centralwidget)
+    #     # self.show()
+    #     # self.update()
+    #     # self.repaint()
 
-    def test_tool(self):
-        print('abccc')
-        self.wel.setText('akkkkkkkkkkkk!')
-        self.takeCentralWidget()
-        self.setCentralWidget(QLabel('kkkdkddaaaaaaaaaaaaaa'))
+    # def test_tool(self):
+    #     print('abccc')
+    #     self.wel.setText('akkkkkkkkkkkk!')
+    #     self.takeCentralWidget()
+    #     self.setCentralWidget(QLabel('kkkdkddaaaaaaaaaaaaaa'))
 
 
 #         main_form = QFormLayout()
@@ -200,53 +200,53 @@ class Ui_MainWindow(QMainWindow):
 #         main_widgt.setLayout(main_form)
 #         self.setCentralWidget(main_widgt)
 
-    def get_left_widgts(self):
-        widgts = []
-        self.game_data = get_games()
-        mylbl = QLabel('运动项目:')
-        mylbl.setMaximumHeight(20)
-        widgts.append(mylbl)
-        self.game_combo = QComboBox(None)
-        self.game_combo.setMaximumWidth(80)
-        self.game_combo.setMaximumHeight(20)
-        for item in self.game_data.keys():
-            self.game_combo.addItem(item)
-        widgts.append(self.game_combo)
-        self.game_combo.setCurrentIndex(-1)
-        self.game_combo.activated[str].connect(self.set_cur_game)
-        return widgts
+    # def get_left_widgts(self):
+    #     widgts = []
+    #     self.game_data = get_games()
+    #     mylbl = QLabel('运动项目:')
+    #     mylbl.setMaximumHeight(20)
+    #     widgts.append(mylbl)
+    #     self.game_combo = QComboBox(None)
+    #     self.game_combo.setMaximumWidth(80)
+    #     self.game_combo.setMaximumHeight(20)
+    #     for item in self.game_data.keys():
+    #         self.game_combo.addItem(item)
+    #     widgts.append(self.game_combo)
+    #     self.game_combo.setCurrentIndex(-1)
+    #     self.game_combo.activated[str].connect(self.set_cur_game)
+    #     return widgts
 
-    def set_cur_game(self,game):
-        self.game = game
-        print(game,self.game_data[game])
-        if self.game_data[game] == 1:
-            self.show_players(game)
+    # def set_cur_game(self,game):
+    #     self.game = game
+    #     print(game,self.game_data[game])
+    #     if self.game_data[game] == 1:
+    #         self.show_players(game)
 
-    def get_right_widgets(self):
-        players = get_players()
-        widgts = []
+    # def get_right_widgets(self):
+    #     players = get_players()
+    #     widgts = []
 
-        for p in players:
-            data = [p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
-            data = ['' if d is None else d for d in data]
-            info = '{: <8} {: <8} {: <2} {: <2} {: <10} {: <12}'.format(*data)
-            widgts.append(QLabel(info))
-        return widgts
+    #     for p in players:
+    #         data = [p.name,p.idcode,p.sex,p.age,p.work_place,p.tel]
+    #         data = ['' if d is None else d for d in data]
+    #         info = '{: <8} {: <8} {: <2} {: <2} {: <10} {: <12}'.format(*data)
+    #         widgts.append(QLabel(info))
+    #     return widgts
 
-    def show_players(self,game):
-        self.test()
+    # def show_players(self,game):
+    #     self.test()
 
-        game_sex = get_games_sex()
-        sex = game_sex[game]
-        self.players = get_players(sex)
-        self.p_checkboxes = [QCheckBox(' '.join((p.name,p.idcode))) for p in self.players]
-        for w in self.right_widgts:
-            w.hide()
-        for cb in self.p_checkboxes:
-            cb.toggle()
-            print('abc')
-            self.right_layout.addWidget(cb)
-        self.right_layout.addStretch()
+    #     game_sex = get_games_sex()
+    #     sex = game_sex[game]
+    #     self.players = get_players(sex)
+    #     self.p_checkboxes = [QCheckBox(' '.join((p.name,p.idcode))) for p in self.players]
+    #     for w in self.right_widgts:
+    #         w.hide()
+    #     for cb in self.p_checkboxes:
+    #         cb.toggle()
+    #         print('abc')
+    #         self.right_layout.addWidget(cb)
+    #     self.right_layout.addStretch()
 
 
     def retranslateUi(self, MainWindow):

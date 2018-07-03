@@ -133,9 +133,13 @@ def new_team(gid,pids,flag=0):
     return infos
 
 @db_session
-def get_team_datas():
+def get_team_datas(game_type=None):
+    if game_type:
+        Ts = select(t for t in Team if t.game==Games[game_type])
+    else:
+        Ts = select(t for t in Team)
     datas = []
-    for team in select(t for t in Team):
+    for team in Ts:
         data = []
         data.append(team.id)
         data.append('-'.join([p.name for p in team.players]))
@@ -145,3 +149,31 @@ def get_team_datas():
     if datas:
         datas.sort(key=lambda x:x[2])
     return datas
+
+@db_session
+def get_group_datas():
+    datas = []
+    for group in select(g for g in Group):
+        data = []
+        data.append(group.id)
+        data.append(group.name)
+        data.append(group.game.name)
+        data.append(','.join((t.name for t in group.teams)))
+        data.append(group.game.id)
+        datas.append(data)
+    if datas:
+        datas.sort(key=lambda x:x[2])
+    return datas
+
+@db_session
+def add_groupdb(name,gid):
+    if exists(p for p in Group if p.name == name):
+        return '不能重名！'
+    else:
+        Group(name=name,game=Games[gid])
+
+@db_session
+def add_team2group_db(gid,tids):
+    g = Group[gid]
+    for tid in tids:
+        g.teams.add(Team[tid])

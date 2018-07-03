@@ -1,7 +1,7 @@
 import time
 import functools
-from models.mydb import Player,PlayGround,Games,Team
-from models.gather import get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
+from models.mydb import Player,PlayGround,Games,Team,Group
+from models.gather import add_team2group_db,add_groupdb,get_group_datas,get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -52,14 +52,18 @@ class Ui_MainWindow(QMainWindow):
         mgr_game = QAction(QIcon(),'竞赛项目',self)
         mgr_game.triggered.connect(functools.partial(self.edit_player,*self.get_game_parmas()))
 
-        mgr_team = QAction(QIcon(),'参赛队',self)
+        mgr_team = QAction(QIcon(),'参赛团队',self)
         mgr_team.triggered.connect(self.edit_team)
+
+        mgr_group = QAction(QIcon(),'分组管理',self)
+        mgr_group.triggered.connect(self.edit_group)
 
         self.toolbar = self.addToolBar('Mytool')
         self.toolbar.addAction(mgr_player)
         self.toolbar.addAction(mgr_playground)
         self.toolbar.addAction(mgr_game)
         self.toolbar.addAction(mgr_team)
+        self.toolbar.addAction(mgr_group)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -392,18 +396,17 @@ class Ui_MainWindow(QMainWindow):
             self.setCentralWidget(main_frame)
 
     def del_team(self):
-        v = MyDialog()
-        # print('....',v.exec_())
-        if v.exec_():
-            name,game = v.get_data()
-            print(name,game)
-        # reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        # if reply == QMessageBox.Yes:
-        #     r = self.player_tabview.currentIndex().row()
-        #     item = self.player_model.index(r,0)
-        #     # print(int(item.data()))
-        #     del_rowdb(Team,int(item.data()))
-        #     self.player_model.removeRow(r)
+        # v = MyDialog()
+        # if v.exec_():
+        #     name,game = v.get_data()
+        #     print(name,game)
+        reply = QMessageBox.question(self, '确认', '确定删除数据?',QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            r = self.player_tabview.currentIndex().row()
+            item = self.player_model.index(r,0)
+            # print(int(item.data()))
+            del_rowdb(Team,int(item.data()))
+            self.player_model.removeRow(r)
 
     def select_player(self,gid,gname,gteam_num,gsex):
         # 新建团队UI
@@ -470,6 +473,86 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
         self.player_tabview.clearSelection()
 
+    def edit_group(self):
+        datas = get_group_datas()
+        head_lst = ['索引号','组名','项目','所含队名','gameid']
+        self.takeCentralWidget()
+        main_frame = QScrollArea(self)
+        main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
+
+        self.player_tabview = QTableView()
+        self.player_model = QStandardItemModel()
+        self.player_model.setHorizontalHeaderLabels(head_lst)
+        if datas:
+            r,c = len(datas),len(datas[0])
+            # self.player_model = QStandardItemModel(r,c)
+            self.player_model.setHorizontalHeaderLabels(head_lst)
+            for r,rdata in enumerate(datas):
+                for c,cell in enumerate(rdata):
+                    it = QStandardItem(str(cell))
+                    # if c == 0:
+                    it.setEditable(False)
+                    self.player_model.setItem(r,c,it)
+        # keys = ['id','name','idcode','sex','age','work_place','tel']
+        # edit_cell = functools.partial(self.edit_cell,obj,keys)
+        # self.player_model.itemChanged.connect(edit_cell)
+
+        self.player_tabview.setModel(self.player_model)
+
+
+        boxlayout = QVBoxLayout()
+        # boxlayout.addStretch(1)
+        boxlayout.addWidget(self.player_tabview,18)
+        # boxlayout.addStretch(1)
+        self.player_tabview.hideColumn(4)
+
+        add_btn = QPushButton('添加分组')
+        add_btn.clicked.connect(self.add_group)
+        boxlayout.addWidget(add_btn)
+
+        del_btn = QPushButton('删除分组')
+        del_btn.clicked.connect(functools.partial(self.del_row,Group))
+        boxlayout.addWidget(del_btn)
+
+        add_team_btn = QPushButton('分配参赛团队')
+        add_team_btn.clicked.connect(self.add_team2group)
+        boxlayout.addWidget(add_team_btn)
+
+        main_frame.setLayout(boxlayout)
+        self.setCentralWidget(main_frame)
+
+    def add_group(self):
+        v = MyDialog()
+        if v.exec_():
+            name,game = v.get_data()
+            if name and game:
+                info = add_groupdb(name,int(game))
+                if info:
+                    QMessageBox.warning(self,'错误',info,QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self,'完成','成功建立！',QMessageBox.Ok)
+                    self.edit_group()
+
+    def add_team2group(self):
+        rows = set()
+
+        for selected_model_index in self.player_tabview.selectedIndexes():
+            rows.add(selected_model_index.row())
+        if len(rows) != 1:
+            QMessageBox.warning(self,'错误','请仅选择其中一个小组',QMessageBox.Ok)
+            return
+        row = rows.pop()
+        groupid = self.player_model.index(row,0).data()
+        gameid = self.player_model.index(row,4).data()
+
+        print(groupid,gameid)
+
+        v = GroupDialog(gameid)
+        if v.exec_():
+            tids = v.get_data()
+            print(tids)
+            if tids:
+                add_team2group_db(groupid,tids)
 
 # # QApplication.processEvents()
 
@@ -510,3 +593,49 @@ class MyDialog(QDialog):
 
     def get_data(self):
         return self.name_edit.text(),self.game_item.itemData(self.game_item.currentIndex())
+
+class GroupDialog(QDialog):
+    def __init__(self,gameid):
+        super().__init__()
+        self.gameid = gameid
+        self.initUI()
+        # self.exec()
+
+    def initUI(self):
+        self.setWindowTitle("添加团队到小组")
+        self.setGeometry(400,400,500,300)
+
+        self.tv = QTableView()
+        head_lst = ['索引号','队名','项目','分组']
+        datas = get_team_datas(self.gameid)
+        self.mdl = QStandardItemModel()
+        if datas:
+            r,c = len(datas),len(datas[0])
+            self.mdl = QStandardItemModel(r,c)
+            self.mdl.setHorizontalHeaderLabels(head_lst)
+            for r,rdata in enumerate(datas):
+                for c,cell in enumerate(rdata):
+                    it = QStandardItem(str(cell))
+                    it.setEditable(False)
+                    self.mdl.setItem(r,c,it)
+            self.tv.setModel(self.mdl)
+        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+
+        self.glayout = QVBoxLayout()
+        self.glayout.addWidget(self.tv)
+        self.glayout.addWidget(self.buttons)
+
+        self.buttons.accepted.connect(self.accept)
+        self.buttons.rejected.connect(self.reject)
+
+        self.setLayout(self.glayout)
+
+    def get_data(self):
+        rows = set()
+        tids = []
+        for selected_model_index in self.tv.selectedIndexes():
+            rows.add(selected_model_index.row())
+        for r in rows:
+            item = self.mdl.index(r,0)
+            tids.append(item.data())
+        return tids

@@ -50,6 +50,12 @@ class Group(db.Entity):
     game = Required('Games')
     teams = Set(Team)
 
+# 测试用
+class TObj(db.Entity):
+    name = Required(str)
+    age = Required(int)
+    tel = Optional(str)
+
 # set_sql_debug(True)
 filename = os.path.join(os.path.abspath(os.curdir),'dbs')
 

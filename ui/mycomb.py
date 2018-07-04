@@ -12,3 +12,4 @@ class CheckableComboBox(QtWidgets.QComboBox):
     def itemChecked(self, index):
         item = self.model().item(i,0)
         return item.checkState() == QtCore.Qt.Checked
+

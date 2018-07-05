@@ -58,12 +58,16 @@ class Ui_MainWindow(QMainWindow):
         mgr_group = QAction(QIcon(),'分组管理',self)
         mgr_group.triggered.connect(self.edit_group)
 
+        mgr_test = QAction(QIcon(),'我的测试',self)
+        mgr_test.triggered.connect(self.test)
+
         self.toolbar = self.addToolBar('Mytool')
         self.toolbar.addAction(mgr_player)
         self.toolbar.addAction(mgr_playground)
         self.toolbar.addAction(mgr_game)
         self.toolbar.addAction(mgr_team)
         self.toolbar.addAction(mgr_group)
+        self.toolbar.addAction(mgr_test)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -472,6 +476,22 @@ class Ui_MainWindow(QMainWindow):
             else:
                 QMessageBox.warning(self,'错误','请选中指定的运动员数：{}'.format(gteam_num),QMessageBox.Ok)
         self.player_tabview.clearSelection()
+
+    def test(self):
+        from .modeltt import TObjModel
+        self.takeCentralWidget()
+        main_frame = QScrollArea(self)
+        main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
+
+        self.player_tabview = QTableView()
+        self.player_model = TObjModel()
+        self.player_tabview.setModel(self.player_model)
+
+        boxlayout = QVBoxLayout()
+        # boxlayout.addStretch(1)
+        boxlayout.addWidget(self.player_tabview,18)
+        main_frame.setLayout(boxlayout)
+        self.setCentralWidget(main_frame)
 
     def edit_group(self):
         datas = get_group_datas()

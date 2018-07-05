@@ -61,7 +61,6 @@ class TObjModel(QAbstractTableModel):
                 else:
                     self.datas[index.row()][col] = value
                 self.dirty = True
-                self.dataChanged[QModelIndex,].emit(index,)
                 self.endResetModel()
                 return True
         return False

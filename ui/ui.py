@@ -430,6 +430,9 @@ class Ui_MainWindow(QMainWindow):
             self.player_tabview = QTableView()
             r,c = len(datas),len(datas[0])
             self.player_model = QStandardItemModel(r,c)
+
+            print(self.player_tabview.itemDelegate())
+
             self.player_model.setHorizontalHeaderLabels(head_lst)
             for r,rdata in enumerate(datas):
                 for c,cell in enumerate(rdata):
@@ -490,6 +493,7 @@ class Ui_MainWindow(QMainWindow):
         boxlayout = QVBoxLayout()
         # boxlayout.addStretch(1)
         boxlayout.addWidget(self.player_tabview,18)
+        self.player_tabview.hideColumn(0)
         main_frame.setLayout(boxlayout)
         self.setCentralWidget(main_frame)
 

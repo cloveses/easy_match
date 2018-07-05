@@ -13,6 +13,7 @@ class TObjModel(QAbstractTableModel):
         self.load()
 
     def load(self):
+        # 载入数据函数
         self.beginResetModel()
         with db_session:
             tobjs = select(t for t in TObj)
@@ -22,6 +23,7 @@ class TObjModel(QAbstractTableModel):
         self.endResetModel()
 
     def data(self,index,role=Qt.DisplayRole):
+        # 供视图调用，以获取用以显示的数据
         if (not index.isValid() or not (0 <= index.row() < len(self.datas))):
             return None
 
@@ -41,6 +43,7 @@ class TObjModel(QAbstractTableModel):
         return len(self.headers)
 
     def headerData(self,section,orientation,role=Qt.DisplayRole):
+        # 实现标题行的定义
         if role != Qt.DisplayRole:
             return None
 
@@ -50,7 +53,7 @@ class TObjModel(QAbstractTableModel):
 
 
     def setData(self,index,value,role=Qt.EditRole):
-
+        # 编辑后更新模型中的数据
         if index.isValid() and 0 <= index.row() < len(self.datas) and value:
             col = index.column()
             print(col)

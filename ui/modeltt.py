@@ -51,7 +51,7 @@ class TObjModel(QAbstractTableModel):
             return self.headers[section]
         return int(section + 1)
 
-
+    # 以下为编辑功能所必须实现的方法
     def setData(self,index,value,role=Qt.EditRole):
         # 编辑后更新模型中的数据
         if index.isValid() and 0 <= index.row() < len(self.datas) and value:
@@ -74,3 +74,22 @@ class TObjModel(QAbstractTableModel):
         return Qt.ItemFlags(
                 QAbstractTableModel.flags(self, index)|
                 Qt.ItemIsEditable | Qt.ItemIsSelectable)
+
+    def insertRows(self,position,rows=1,index=QModelIndex()):
+        # position 插入位置；rows 插入行数
+        self.beginInsertRows(QModelIndex(),position,position + rows -1)
+        pass #  对self.datas进行操作
+        self.endInsertRows()
+        self.dirty = True
+        return True
+
+    def removeRows(self,position,rows=1,index=QModelIndex):
+        # position 删除位置；rows 删除行数
+        self.beginRemoveRows(QModelIndex(),position,position + rows -1)
+        pass  #  对self.datas进行操作
+        self.endRemoveRows()
+        self.dirty = True
+        return True
+
+    # 可单独定义保存数据的方法（遍历datas进行保存），供用户退出时或选择保存时，保存数据
+    # 也可以在用户编辑时立即保存，即在setData方法中保存

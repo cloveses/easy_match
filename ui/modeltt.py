@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QAbstractTableModel,QModelIndex,QVariant,Qt
-from PyQt5.QtWidgets import QStyledItemDelegate,QLineEdit
+from PyQt5.QtWidgets import QStyledItemDelegate,QLineEdit,QComboBox
 
 from models.mydb import TObj,db_session,select
 
@@ -102,15 +102,12 @@ class MyDelegate(QStyledItemDelegate):
         super().__init__(parent)
 
     def createEditor(self,parent,option,index):
-        print('aaa')
         wdgt = QLineEdit(parent)
         return wdgt
 
     def setEditorData(self,editor,index):
-        print('setEditData')
         value = index.model().data(index,Qt.DisplayRole)
         editor.setText(str(value))
 
     def setModelData(self,editor,model,index):
-        print('setModelData')
         model.setData(index,editor.text())

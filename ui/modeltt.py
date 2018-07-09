@@ -1,4 +1,6 @@
 from PyQt5.QtCore import QAbstractTableModel,QModelIndex,QVariant,Qt
+from PyQt5.QtWidgets import QStyledItemDelegate,QLineEdit
+
 from models.mydb import TObj,db_session,select
 
 ID,NAME,AGE,TEL = range(4)
@@ -93,3 +95,22 @@ class TObjModel(QAbstractTableModel):
 
     # 可单独定义保存数据的方法（遍历datas进行保存），供用户退出时或选择保存时，保存数据
     # 也可以在用户编辑时立即保存，即在setData方法中保存
+
+class MyDelegate(QStyledItemDelegate):
+
+    def __init__(self,parent=None):
+        super().__init__(parent)
+
+    def createEditor(self,parent,option,index):
+        print('aaa')
+        wdgt = QLineEdit(parent)
+        return wdgt
+
+    def setEditorData(self,editor,index):
+        print('setEditData')
+        value = index.model().data(index,Qt.DisplayRole)
+        editor.setText(str(value))
+
+    def setModelData(self,editor,model,index):
+        print('setModelData')
+        model.setData(index,editor.text())

@@ -481,7 +481,8 @@ class Ui_MainWindow(QMainWindow):
         self.player_tabview.clearSelection()
 
     def test(self):
-        from .modeltt import TObjModel
+        from .modeltt import TObjModel,MyDelegate
+        md = MyDelegate()
         self.takeCentralWidget()
         main_frame = QScrollArea(self)
         main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
@@ -493,6 +494,7 @@ class Ui_MainWindow(QMainWindow):
         boxlayout = QVBoxLayout()
         # boxlayout.addStretch(1)
         boxlayout.addWidget(self.player_tabview,18)
+        self.player_tabview.setItemDelegateForColumn(2,md)
         self.player_tabview.hideColumn(0)
         main_frame.setLayout(boxlayout)
         self.setCentralWidget(main_frame)

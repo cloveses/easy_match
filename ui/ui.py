@@ -1,7 +1,7 @@
 import time
 import functools
 from models.mydb import Player,PlayGround,Games,Team,Group
-from models.gather import add_team2group_db,add_groupdb,get_group_datas,get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
+from models.gather import get_group_for_game,add_team2group_db,add_groupdb,get_group_datas,get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -23,6 +23,7 @@ class Ui_MainWindow(QMainWindow):
         self.select_checkbox_num = 0
         self.all_widgets = []
         self.game_sub_menus = []
+        self.face_sub_menus = []
         self.setupUi(self)
         self.updateMenu(self)
         self.retranslateUi(self)
@@ -38,8 +39,11 @@ class Ui_MainWindow(QMainWindow):
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
 
-        self.menu_team = QtWidgets.QMenu(self.menubar)
+        self.menu_team = QtWidgets.QMenu(self.menubar) #参赛队组建菜单
         self.menu_team.setObjectName("menu_team")
+
+        self.menu_face = QtWidgets.QMenu(self.menubar) #对阵组建
+        self.menu_face.setObjectName("menu_face")
 
         MainWindow.setMenuBar(self.menubar)
 
@@ -61,6 +65,9 @@ class Ui_MainWindow(QMainWindow):
         mgr_test = QAction(QIcon(),'我的测试',self)
         mgr_test.triggered.connect(self.test)
 
+        # mgr_face = QAction(QIcon(),'对阵设定',self)
+        # mgr_face.triggered.connect(self.edit_face)
+
         self.toolbar = self.addToolBar('Mytool')
         self.toolbar.addAction(mgr_player)
         self.toolbar.addAction(mgr_playground)
@@ -68,6 +75,7 @@ class Ui_MainWindow(QMainWindow):
         self.toolbar.addAction(mgr_team)
         self.toolbar.addAction(mgr_group)
         self.toolbar.addAction(mgr_test)
+        # self.toolbar.addAction(mgr_face)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -88,6 +96,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_team.menuAction())
+        self.menubar.addAction(self.menu_face.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -108,16 +117,35 @@ class Ui_MainWindow(QMainWindow):
     def updateMenu(self,MainWindow):
         """添加或更新为每个竞赛项目组队的‘参赛队组建’菜单"""
         self.games = get_games()
+        # 清除‘参赛队组建’原子菜单
         for game_sub_menu in self.game_sub_menus:
             self.menu_team.removeAction(game_sub_menu)
+
         for game in self.games:
             self.game_sub_menus.append(QtWidgets.QAction(MainWindow))
+
         for game_sub_menu,game in zip(self.game_sub_menus,self.games):
             game_sub_menu.setObjectName(game.name)
             game_sub_menu.triggered.connect(functools.partial(self.select_player,game.id,game.name,game.team_num,game.sex))
             game_sub_menu.setText(QtCore.QCoreApplication.translate("MainWindow", "&{}".format(game.name)))
+
         for game_sub_menu in self.game_sub_menus:
             self.menu_team.addAction(game_sub_menu)
+
+        """添加或更新为每个竞赛项目组队的‘对阵组建’菜单"""
+        for face_sub_menu in self.face_sub_menus:
+            self.menu_face.removeAction(face_sub_menu)
+
+        for game in self.games:
+            self.face_sub_menus.append(QtWidgets.QAction(MainWindow))
+
+        for game_sub_menu,game in zip(self.face_sub_menus,self.games):
+            game_sub_menu.setObjectName(game.name+'_')
+            game_sub_menu.triggered.connect(functools.partial(self.new_face,game.id))
+            game_sub_menu.setText(QtCore.QCoreApplication.translate("MainWindow", "&{}".format(game.name)))
+
+        for game_sub_menu in self.face_sub_menus:
+            self.menu_face.addAction(game_sub_menu)
 
     def add_first_ui(self,info="Welcome!"):
         self.takeCentralWidget()
@@ -261,6 +289,8 @@ class Ui_MainWindow(QMainWindow):
         self.action_import_data.setText(_translate("MainWindow", "&导入数据"))
 
         self.menu_team.setTitle(_translate("MainWindow", "&参赛队组建"))
+
+        self.menu_face.setTitle(_translate("MainWindow","&对阵组建"))
 
     def get_data_file(self):
         fname = QFileDialog.getOpenFileName(self, '打开文件', '.\\')
@@ -579,6 +609,27 @@ class Ui_MainWindow(QMainWindow):
             print(tids)
             if tids:
                 add_team2group_db(groupid,tids)
+
+    def new_face(self,gid):
+        print(gid)
+        self.takeCentralWidget()
+        main_frame = QScrollArea(self)
+        main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
+
+        boxlayout = QVBoxLayout()
+        # boxlayout.addWidget(self.player_tabview,18)
+        groups = get_group_for_game(gid)
+
+        grp_combo = QComboBox()
+        for gid,gname,ggname in groups:
+            grp_combo.addItem('-'.join((ggname,gname)),gid)
+
+        boxlayout.addWidget(grp_combo)
+        
+        main_frame.setLayout(boxlayout)
+        self.setCentralWidget(main_frame)
+
+
 
 # # QApplication.processEvents()
 

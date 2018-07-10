@@ -170,10 +170,16 @@ def add_groupdb(name,gid):
     if exists(p for p in Group if p.name == name):
         return '不能重名！'
     else:
-        Group(name=name,game=Games[gid])
+        g = Group(name=name,game=Games[gid])
+        Games[gid].group.add(g)
 
 @db_session
 def add_team2group_db(gid,tids):
     g = Group[gid]
     for tid in tids:
         g.teams.add(Team[tid])
+
+@db_session
+def get_group_for_game(gid):
+    groups = select(g for g in Group if g.game==Games[gid])
+    return [(g.id,g.name,g.game.name) for g in groups]

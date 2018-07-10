@@ -15,7 +15,7 @@ class Games(db.Entity):
     sex = Optional(str,nullable=True)
     memo = Optional(str,nullable=True)
     team = Set('Team')
-    group = Optional('Group')
+    group = set('Group')
 
 class Player(db.Entity):
     name = Required(str)
@@ -47,7 +47,7 @@ class Face(db.Entity):
 
 class Group(db.Entity):
     name = Required(str)
-    game = Required('Games')
+    game = Required('Games',reverse="group")
     teams = Set(Team)
 
 # 测试用

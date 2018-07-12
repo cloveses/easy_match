@@ -192,12 +192,16 @@ def get_teams_for_group(gid):
 @db_session
 def add_face2db(tid1,tid2):
     print(tid1,tid2)
-    # teama = Team[tid1]
-    # teamb
-    # Face(teama=teama,teamb=Team[tid2])
+    teama = Team[tid1]
+    teamb = Team[tid2]
+    print(teama.name,teamb.name)
+    Face(teama=teama,teamb=teamb)
+    teama.
+
 
 @db_session
 def get_faces(gid,ggid):
     faces = select(f for f in Face if f.teama.game.id == gid and f.teama.group.id == ggid)
     return [(f.id,' '.join(str(f.teama.id),f.teama.name),
         ' '.join(str(f.teamb.id),f.teamb.name)) for f in faces]
+    # return [('1','aa','bb'),]

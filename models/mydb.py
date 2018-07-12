@@ -15,7 +15,7 @@ class Games(db.Entity):
     sex = Optional(str,nullable=True)
     memo = Optional(str,nullable=True)
     team = Set('Team')
-    group = set('Group')
+    group = Set('Group')
 
 class Player(db.Entity):
     name = Required(str)
@@ -29,8 +29,8 @@ class Player(db.Entity):
 class Team(db.Entity):
     name = Required(str)
     players = Set('Player')
-    facea = Optional('Face', reverse="teama")
-    faceb = Optional('Face', reverse="teamb")
+    # facea = Optional('Face', reverse="teama")
+    # faceb = Optional('Face', reverse="teamb")
     game = Required('Games')
     group = Optional('Group')
 
@@ -38,16 +38,16 @@ class PlayDate(db.Entity):
     flag = Required(str)
 
 class Face(db.Entity):
-    times = Required(int)
-    teama = Required('Team', reverse="facea", cascade_delete=True)
-    teamb = Required('Team', reverse="faceb", cascade_delete=True)
+    teama = Required(Team)
+    teamb = Required(Team)
+    times = Optional(int,default=0)
     scorea = Optional(int,nullable=True)
     scoreb = Optional(int,nullable=True)
     playground = Optional(PlayGround)
 
 class Group(db.Entity):
     name = Required(str)
-    game = Required('Games',reverse="group")
+    game = Required(Games,reverse="group")
     teams = Set(Team)
 
 # 测试用

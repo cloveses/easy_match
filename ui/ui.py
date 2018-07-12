@@ -1,7 +1,7 @@
 import time
 import functools
 from models.mydb import Player,PlayGround,Games,Team,Group
-from models.gather import get_group_for_game,add_team2group_db,add_groupdb,get_group_datas,get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
+from models.gather import get_faces,add_face2db,get_teams_for_group,get_group_for_game,add_team2group_db,add_groupdb,get_group_datas,get_team_datas,new_team,get_games,del_rowdb,save_cell,has_data,clear_data,load_data,get_games,get_games_sex,get_players,get_playgrounds
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QScrollArea, QAction,QPushButton,QCheckBox,QComboBox,
@@ -24,6 +24,7 @@ class Ui_MainWindow(QMainWindow):
         self.all_widgets = []
         self.game_sub_menus = []
         self.face_sub_menus = []
+        self.face_view = None
         self.setupUi(self)
         self.updateMenu(self)
         self.retranslateUi(self)
@@ -603,7 +604,7 @@ class Ui_MainWindow(QMainWindow):
 
         print(groupid,gameid)
 
-        v = GroupDialog(gameid)
+        v = GroupDialog(gameid,"添加团队到小组",get_team_datas)
         if v.exec_():
             tids = v.get_data()
             print(tids)
@@ -611,7 +612,7 @@ class Ui_MainWindow(QMainWindow):
                 add_team2group_db(groupid,tids)
 
     def new_face(self,gid):
-        print(gid)
+        # print(gid)
         self.takeCentralWidget()
         main_frame = QScrollArea(self)
         main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
@@ -620,16 +621,92 @@ class Ui_MainWindow(QMainWindow):
         # boxlayout.addWidget(self.player_tabview,18)
         groups = get_group_for_game(gid)
 
-        grp_combo = QComboBox()
+        self.grp_combo = QComboBox()
         for gid,gname,ggname in groups:
-            grp_combo.addItem('-'.join((ggname,gname)),gid)
+            self.grp_combo.addItem('-'.join((ggname,gname)),gid)
 
-        boxlayout.addWidget(grp_combo)
-        
+        self.grp_combo.setCurrentIndex(-1)
+
+        self.grp_combo.currentIndexChanged.connect(functools.partial(self.disp_face,boxlayout,gid))
+        self.grp_combo.setToolTip('请选择一个分组,并为其建立对阵。')
+
+        boxlayout.addWidget(self.grp_combo)
+        boxlayout.addStretch(1)
+
         main_frame.setLayout(boxlayout)
         self.setCentralWidget(main_frame)
 
+    def disp_face(self,boxlayout,gid):
+        # print(self.grp_combo.currentIndex(),self.grp_combo.currentText())
+        ggid = self.grp_combo.currentIndex() + 1
+        if ggid >= 1:
+            # teams = get_teams_for_group(gid)
+            # self.team_view = QTableView()
+            # self.team_model = QStandardItemModel()
+            # self.team_model.setHorizontalHeaderLabels(['id','队名','队员'])
 
+            # for r,rd in enumerate(teams):
+            #     for c,cd in enumerate(rd):
+            #         item = QStandardItem(str(cd))
+            #         item.setEditable(False)
+            #         self.team_model.setItem(r,c,item)
+            # self.team_view.setModel(self.team_model)
+
+            if not self.face_view:
+                faces = get_faces(gid,ggid)
+                self.face_view = QTableView()
+                self.face_model = QStandardItemModel()
+                self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
+
+                for r,rd in enumerate(faces):
+                    for c,cd in enumerate(rd):
+                        item = QStandardItem(str(cd))
+                        item.setEditable(False)
+                        self.face_model.setItem(r,c,item)
+                self.face_view.setModel(self.face_model)
+                boxlayout.addWidget(self.face_view,100)
+            else:
+                self.face_model.beginResetModel()
+                self.face_model.clear()
+                self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
+                faces = get_faces(gid,ggid)
+                for r,rd in enumerate(faces):
+                    for c,cd in enumerate(rd):
+                        item = QStandardItem(str(cd))
+                        item.setEditable(False)
+                        self.face_model.setItem(r,c,item)
+                self.face_model.endResetModel()
+            add_btn = QPushButton('添加对阵')
+            add_btn.clicked.connect(functools.partial(self.add_face,gid))
+            boxlayout.addWidget(add_btn)
+
+    def add_face(self,gid):
+
+        v = GroupDialog(gid,"添加对阵团队",get_teams_for_group)
+        if v.exec_():
+            tids = v.get_data()
+            print(tids)
+            tids = [int(tid) for tid in tids]
+            if len(tids) != 2:
+                QMessageBox.warning(self,'错误','请仅选择对阵的双方小组',QMessageBox.Ok)
+            else:
+                add_face2db(*tids)
+                QMessageBox.information(self,'提示','操作完成！',QMessageBox.Ok)
+        #     return
+        #     if tids:
+
+
+
+        # rows = set()
+
+        # for selected_model_index in self.team_view.selectedIndexes():
+        #     rows.add(selected_model_index.row())
+        # if len(rows) != 2:
+        #     QMessageBox.warning(self,'错误','请仅选择对阵的双方小组',QMessageBox.Ok)
+        #     return
+        # tid1,tid2 = [self.team_model.index(row,0).data() for row in rows]
+        # add_face2db(tid1,tid2)
+        # QMessageBox.information(self,'提示','操作完成！',QMessageBox.Ok)
 
 # # QApplication.processEvents()
 
@@ -672,19 +749,21 @@ class MyDialog(QDialog):
         return self.name_edit.text(),self.game_item.itemData(self.game_item.currentIndex())
 
 class GroupDialog(QDialog):
-    def __init__(self,gameid):
+    def __init__(self,gid,w_title,get_data_fun):
         super().__init__()
-        self.gameid = gameid
+        self.gid = gid
+        self.w_title = w_title
+        self.get_data_fun = get_data_fun
         self.initUI()
         # self.exec()
 
     def initUI(self):
-        self.setWindowTitle("添加团队到小组")
+        self.setWindowTitle(self.w_title)
         self.setGeometry(400,400,500,300)
 
         self.tv = QTableView()
         head_lst = ['索引号','队名','项目','分组']
-        datas = get_team_datas(self.gameid)
+        datas = self.get_data_fun(self.gid)
         self.mdl = QStandardItemModel()
         if datas:
             r,c = len(datas),len(datas[0])

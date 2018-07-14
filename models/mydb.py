@@ -29,21 +29,23 @@ class Player(db.Entity):
 class Team(db.Entity):
     name = Required(str)
     players = Set('Player')
-    facea = Optional('Face', reverse="teama")
-    faceb = Optional('Face', reverse="teamb")
+    facea = Set('Face',reverse='teama')
+    faceb = Set('Face',reverse='teamb')
     game = Required('Games')
     group = Optional('Group')
+    status = Optional(bool,default=False)
 
 class PlayDate(db.Entity):
     flag = Required(str)
 
 class Face(db.Entity):
-    teama = Required(Team, reverse="facea")
-    teamb = Required(Team, reverse="faceb")
+    teama = Required(Team,reverse='facea')
+    teamb = Required(Team,reverse='faceb')
     times = Optional(int,default=0)
     scorea = Optional(int,nullable=True)
     scoreb = Optional(int,nullable=True)
     playground = Optional(PlayGround)
+    PrimaryKey(teama,teamb)
 
 class Group(db.Entity):
     name = Required(str)

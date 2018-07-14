@@ -192,11 +192,11 @@ def get_teams_for_group(gid):
 @db_session
 def add_face2db(tid1,tid2):
     print(tid1,tid2)
-    teama = Team[tid1]
-    teamb = Team[tid2]
-    print(teama.name,teamb.name)
-    Face(teama=teama,teamb=teamb)
-    teama.
+    # teama = Team[tid1]
+    # teamb = Team[tid2]
+    # print(teama.name,teamb.name)
+    # Face(teama=teama,teamb=teamb)
+    # teama.
 
 
 @db_session

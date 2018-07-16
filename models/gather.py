@@ -195,8 +195,9 @@ def add_face2db(tid1,tid2):
     teama = Team[tid1]
     teamb = Team[tid2]
     print(teama.name,teamb.name)
-    Face(teama=teama,teamb=teamb)
-    teama.
+    face = Face(teama=teama,teamb=teamb)
+    teama.facea = face
+    teamb.faceb = face
 
 
 @db_session

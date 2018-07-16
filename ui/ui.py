@@ -24,7 +24,6 @@ class Ui_MainWindow(QMainWindow):
         self.all_widgets = []
         self.game_sub_menus = []
         self.face_sub_menus = []
-        self.face_view = None
         self.setupUi(self)
         self.updateMenu(self)
         self.retranslateUi(self)
@@ -611,6 +610,20 @@ class Ui_MainWindow(QMainWindow):
             if tids:
                 add_team2group_db(groupid,tids)
 
+    def get_grp_combo(self,gid):
+        groups = get_group_for_game(gid)
+        cur_index = -1
+        grp_combo = QComboBox()
+        for index,(ggid,gname,ggname) in enumerate(groups):
+            grp_combo.addItem('-'.join((ggname,gname)),ggid)
+
+        grp_combo.setCurrentIndex(cur_index)
+
+        grp_combo.currentIndexChanged.connect(functools.partial(self.disp_face,gid))
+        grp_combo.setToolTip('请选择一个分组,并为其建立对阵。')
+
+        return grp_combo
+
     def new_face(self,gid):
         # print(gid)
         self.takeCentralWidget()
@@ -618,67 +631,41 @@ class Ui_MainWindow(QMainWindow):
         main_frame.setStyleSheet('QWidget{background-color:rgb(255,255,255)}')
 
         boxlayout = QVBoxLayout()
-        # boxlayout.addWidget(self.player_tabview,18)
-        groups = get_group_for_game(gid)
 
-        self.grp_combo = QComboBox()
-        for gid,gname,ggname in groups:
-            self.grp_combo.addItem('-'.join((ggname,gname)),gid)
-
-        self.grp_combo.setCurrentIndex(-1)
-
-        self.grp_combo.currentIndexChanged.connect(functools.partial(self.disp_face,boxlayout,gid))
-        self.grp_combo.setToolTip('请选择一个分组,并为其建立对阵。')
+        self.grp_combo = self.get_grp_combo(gid)
 
         boxlayout.addWidget(self.grp_combo)
-        boxlayout.addStretch(1)
+        # boxlayout.addStretch(1)
+
+        self.face_view = QTableView()
+        self.face_model = QStandardItemModel()
+        self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
+        self.face_view.setModel(self.face_model)
+
+        boxlayout.addWidget(self.face_view)
+
+        add_btn = QPushButton('添加对阵')
+        add_btn.clicked.connect(functools.partial(self.add_face,gid))
+        boxlayout.addWidget(add_btn)
 
         main_frame.setLayout(boxlayout)
         self.setCentralWidget(main_frame)
 
-    def disp_face(self,boxlayout,gid):
+    def disp_face(self,gid):
         # print(self.grp_combo.currentIndex(),self.grp_combo.currentText())
-        ggid = self.grp_combo.currentIndex() + 1
+        ggid = int(self.grp_combo.itemData(self.grp_combo.currentIndex()))
         if ggid >= 1:
-            # teams = get_teams_for_group(gid)
-            # self.team_view = QTableView()
-            # self.team_model = QStandardItemModel()
-            # self.team_model.setHorizontalHeaderLabels(['id','队名','队员'])
 
-            # for r,rd in enumerate(teams):
-            #     for c,cd in enumerate(rd):
-            #         item = QStandardItem(str(cd))
-            #         item.setEditable(False)
-            #         self.team_model.setItem(r,c,item)
-            # self.team_view.setModel(self.team_model)
-
-            if not self.face_view:
-                faces = get_faces(gid,ggid)
-                self.face_view = QTableView()
-                self.face_model = QStandardItemModel()
-                self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
-
-                for r,rd in enumerate(faces):
-                    for c,cd in enumerate(rd):
-                        item = QStandardItem(str(cd))
-                        item.setEditable(False)
-                        self.face_model.setItem(r,c,item)
-                self.face_view.setModel(self.face_model)
-                boxlayout.addWidget(self.face_view,100)
-            else:
-                self.face_model.beginResetModel()
-                self.face_model.clear()
-                self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
-                faces = get_faces(gid,ggid)
-                for r,rd in enumerate(faces):
-                    for c,cd in enumerate(rd):
-                        item = QStandardItem(str(cd))
-                        item.setEditable(False)
-                        self.face_model.setItem(r,c,item)
-                self.face_model.endResetModel()
-            add_btn = QPushButton('添加对阵')
-            add_btn.clicked.connect(functools.partial(self.add_face,gid))
-            boxlayout.addWidget(add_btn)
+            self.face_model.beginResetModel()
+            self.face_model.clear()
+            self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
+            faces = get_faces(gid,ggid)
+            for r,rd in enumerate(faces):
+                for c,cd in enumerate(rd):
+                    item = QStandardItem(str(cd))
+                    item.setEditable(False)
+                    self.face_model.setItem(r,c,item)
+            self.face_model.endResetModel()
 
     def add_face(self,gid):
 
@@ -691,6 +678,7 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.warning(self,'错误','请仅选择对阵的双方小组',QMessageBox.Ok)
             else:
                 add_face2db(*tids)
+                self.disp_face(gid)
                 QMessageBox.information(self,'提示','操作完成！',QMessageBox.Ok)
         #     return
         #     if tids:

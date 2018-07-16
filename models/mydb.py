@@ -38,12 +38,14 @@ class PlayDate(db.Entity):
     flag = Required(str)
 
 class Face(db.Entity):
+    id = Required(int,nullable=False,auto=True)
     teama = Required(Team, reverse="facea")
     teamb = Required(Team, reverse="faceb")
     times = Optional(int,default=0)
     scorea = Optional(int,nullable=True)
     scoreb = Optional(int,nullable=True)
     playground = Optional(PlayGround)
+    PrimaryKey(teama,teamb)
 
 class Group(db.Entity):
     name = Required(str)

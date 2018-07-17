@@ -45,7 +45,7 @@ class Face(db.Entity):
     scorea = Optional(int,nullable=True)
     scoreb = Optional(int,nullable=True)
     playground = Optional(PlayGround)
-    PrimaryKey(teama,teamb)
+    composite_key(teama,teamb)
 
 class Group(db.Entity):
     name = Required(str)

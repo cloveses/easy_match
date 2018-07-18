@@ -602,13 +602,16 @@ class Ui_MainWindow(QMainWindow):
         gameid = self.player_model.index(row,4).data()
 
         print(groupid,gameid)
-
-        v = GroupDialog(gameid,"添加团队到小组",get_team_datas)
-        if v.exec_():
-            tids = v.get_data()
-            print(tids)
-            if tids:
-                add_team2group_db(groupid,tids)
+        if get_team_datas(gameid):
+            v = GroupDialog(gameid,"添加团队到小组",get_team_datas)
+            if v.exec_():
+                tids = v.get_data()
+                print(tids)
+                if tids:
+                    add_team2group_db(groupid,tids)
+                    QMessageBox.information(self,'提示','操作完成！',QMessageBox.Ok)
+        else:
+            QMessageBox.information(self,'提示','无参赛团队可以分组！',QMessageBox.Ok)
 
     def get_grp_combo(self,gid):
         groups = get_group_for_game(gid)
@@ -653,13 +656,13 @@ class Ui_MainWindow(QMainWindow):
 
     def disp_face(self,gid):
         # print(self.grp_combo.currentIndex(),self.grp_combo.currentText())
-        ggid = int(self.grp_combo.itemData(self.grp_combo.currentIndex()))
-        if ggid >= 1:
+        self.ggid = int(self.grp_combo.itemData(self.grp_combo.currentIndex()))
+        if self.ggid >= 1:
 
             self.face_model.beginResetModel()
             self.face_model.clear()
             self.face_model.setHorizontalHeaderLabels(['id','队A','队B'])
-            faces = get_faces(gid,ggid)
+            faces = get_faces(gid,self.ggid)
             for r,rd in enumerate(faces):
                 for c,cd in enumerate(rd):
                     item = QStandardItem(str(cd))
@@ -669,7 +672,7 @@ class Ui_MainWindow(QMainWindow):
 
     def add_face(self,gid):
 
-        v = GroupDialog(gid,"添加对阵团队",get_teams_for_group)
+        v = GroupDialog(self.ggid,"添加对阵团队",get_teams_for_group)
         if v.exec_():
             tids = v.get_data()
             print(tids)
@@ -677,9 +680,12 @@ class Ui_MainWindow(QMainWindow):
             if len(tids) != 2:
                 QMessageBox.warning(self,'错误','请仅选择对阵的双方小组',QMessageBox.Ok)
             else:
-                add_face2db(*tids)
-                self.disp_face(gid)
-                QMessageBox.information(self,'提示','操作完成！',QMessageBox.Ok)
+                tids.sort()
+                if add_face2db(*tids):
+                    self.disp_face(gid)
+                    QMessageBox.information(self,'提示','操作完成！',QMessageBox.Ok)
+                else:
+                    QMessageBox.warning(self,'错误','对阵不能重复！',QMessageBox.Ok)
         #     return
         #     if tids:
 

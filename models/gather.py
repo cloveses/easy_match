@@ -135,7 +135,7 @@ def new_team(gid,pids,flag=0):
 @db_session
 def get_team_datas(game_type=None):
     if game_type:
-        Ts = select(t for t in Team if t.game==Games[game_type])
+        Ts = select(t for t in Team if t.game==Games[game_type] and t.group==None)
     else:
         Ts = select(t for t in Team)
     datas = []
@@ -195,14 +195,15 @@ def add_face2db(tid1,tid2):
     teama = Team[tid1]
     teamb = Team[tid2]
     print(teama.name,teamb.name)
-    face = Face(teama=teama,teamb=teamb)
-    teama.facea = face
-    teamb.faceb = face
-
+    if not exists(f for f in Face if f.teama==teama and f.teamb==teamb):
+        face = Face(teama=teama,teamb=teamb)
+        teama.facea = face
+        teamb.faceb = face
+        return True
 
 @db_session
 def get_faces(gid,ggid):
     faces = select(f for f in Face if f.teama.game.id == gid and f.teama.group.id == ggid)
-    return [(f.id,' '.join(str(f.teama.id),f.teama.name),
-        ' '.join(str(f.teamb.id),f.teamb.name)) for f in faces]
+    return [(f.id,' '.join((str(f.teama.id),f.teama.name)),
+        ' '.join((str(f.teamb.id),f.teamb.name))) for f in faces]
     # return [('1','aa','bb'),]

@@ -212,3 +212,10 @@ class Ui_MainWindow(QMainWindow):
             clear_data()
 
 # # QApplication.processEvents()
+## Ui_MainWindow不继承QMainWindow时，用以下方法启动UI
+    # app = QtWidgets.QApplication(sys.argv)
+    # MainWindow = QtWidgets.QMainWindow()
+    # ui = Ui_MainWindow()
+    # ui.setupUi(MainWindow)
+    # MainWindow.show()
+    # sys.exit(app.exec_())
